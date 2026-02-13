@@ -27,3 +27,28 @@ Grace a extract message, le vector contiendra et renvoiera bien 2 string complet
 
 # clearBuffer()
 --> Utile pour vider le buffer en cas d'erreur ou de deconnexion
+
+# Cours sur poll()
+poll() observe une liste de FDs et me dis lesquels sont pretes.
+Sans poll(), je serais obligée d'appeler recv() sur chaque client un par un, et si un client n'a rien envoyé, recv() bloque et les autres attendent.
+
+Prototype:
+int poll(struct pollfd *fds, nfds_t nfds, int timeout);
+    --> fds: Tableau de structure pollfd
+    --> nfds: Nombre d'fd dans le tableau
+    --> timeout: Le temps en ms
+
+struct pollfd {
+    int   fd;         // File descriptor à surveiller
+    short events;     // Ce qu’on veut surveiller (POLLIN, POLLOUT...)
+    short revents;    // Ce qui s’est réellement produit
+};
+
+Elements a surveiller:
+POLLIN    // Données disponibles en lecture (recv ne bloquera pas)
+POLLOUT   // Socket prête pour écriture (send ne bloquera pas)
+POLLHUP   // Client déconnecté (Hang Up)
+POLLERR   // Erreur sur la socket
+POLLNVAL  // FD invalide
+
+
