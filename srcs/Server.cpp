@@ -60,6 +60,21 @@ void Server::initPoll()
 	_pollFds.push_back(PollFds);
 }
 
+void Server::acceptNewClient()
+{
+	struct sockaddr_in clientAddr;
+	socklen_t clientLen = sizeof(clientAddr);
+	
+	int clientSocket = accept(_serverSocket, (struct sockaddr *)&clientAddr, &clientLen);
+	if (clientSocket < 0)
+	throw std::runtime_error("Failed to accept connection");
+	
+	fcntl(clientSocket, F_SETFL, O_NONBLOCK);
+	std::cout << "OK, New connection accepted (FD: " << clientSocket << ")" << std::endl;
+	
+	addClient(clientSocket);
+}
+
 void Server::addClient(int fd)
 {
 	Client *newClient = new Client(fd);
@@ -73,21 +88,6 @@ void Server::addClient(int fd)
 	_pollFds.push_back(pollFds);
 
 	std::cout << "New clients fd " << fd << " added" << std::endl;
-}
-
-void Server::acceptNewClient()
-{
-	struct sockaddr_in clientAddr;
-	socklen_t clientLen = sizeof(clientAddr);
-
-	int clientSocket = accept(_serverSocket, (struct sockaddr *)&clientAddr, &clientLen);
-	if (clientSocket < 0)
-		throw std::runtime_error("Failed to accept connection");
-
-	fcntl(clientSocket, F_SETFL, O_NONBLOCK);
-	std::cout << "OK, New connection accepted (FD: " << clientSocket << ")" << std::endl;
-	
-	addClient(clientSocket);
 }
 
 void Server::removeClient(int fd)
