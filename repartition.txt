@@ -831,3 +831,27 @@ Si la commande est juste MODE #channel (sans modes à changer) :
     Envoyer code 324 RPL_CHANNELMODEIS avec les modes actifs
 
     Format : :servername 324 nickname #channel +itk
+
+
+
+001 → RPL_WELCOME --> Apres avoir rempli NICK USER PASS, y a le msg de bienvenue
+461 → ERR_NEEDMOREPARAMS --> si on fait par ex  USER avec manque de parametre
+462 → ERR_ALREADYREGISTERED --> si un client est deja enregistree et qu'il essaie de se reconnecter, pourquoi faire ?
+464 → ERR_PASSWDMISMATCH --> mauvais password ?
+431 → ERR_NONICKNAMEGIVEN --> NICK sans rien derriere
+432 → ERR_ERRONEUSNICKNAME --> NICK avec carateres interdits
+433 → ERR_NICKNAMEINUSE --> NICK deja utilise
+
+
+#include <sstream>
+
+std::ostringstream oss;
+oss << ":ircserv " << "001 " << client->getNickname() << " :Welcome!\r\n";
+std::string response = oss.str();
+
+send(client->getFd(), response.c_str(), response.size(), 0);
+```
+
+**Essaie d'écrire `sendWelcome()`** en premier. C'est le plus simple :
+```
+:ircserv 001 alice :Welcome to the IRC Network, alice!\r\n
