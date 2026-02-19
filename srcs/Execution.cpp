@@ -33,7 +33,7 @@ void execNick(Client *client, const t_command &cmd, const std::vector<Client*> &
         IRC::errNickChar(client);
     else {
         for (size_t i = 0; i < clients.size(); i++) {
-            if (cmd.params[0] == clients[i]->getNickname()) {
+            if (cmd.params[0] == clients[i]->getNickname() && clients[i] != client) {
                 IRC::errNickInuse(client, cmd.params[0]);
                 return;
             }
@@ -42,7 +42,7 @@ void execNick(Client *client, const t_command &cmd, const std::vector<Client*> &
     }
 }
 
-void execUser(Client *client, const t_command &cmd, const std::vector<Client*>&clients)
+void execUser(Client *client, const t_command &cmd)
 {
 	if (!client->isAuthenticated())
 		return;
