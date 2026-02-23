@@ -55,12 +55,17 @@ sin_addr   = 0.0.0.0        // Toutes les interfaces réseau de la machine
 sin_port   = 6667           // Le port
 
 **Explications Server.cpp**
+
+# La variable global :
+  Pour l'nstant dans le cpp, extern pour dire "Cette var global est utilise quelque part d'autre (main)". Elle sert a capter le ^C. Des qu'il a etait intercepte on sort de la boucle et le destructeur est appelle. Tout est bien ferme.
+
 # Le Constructeur :
 - Le _port et le _password seront ceux passe en parametres.
 - _ServeurSocket initialise a -1 pour dire "pas encore cree".
 - Mise a 0 de la strcuture _serverAddr pour eviter valeurs aleatoires.
 
 # Le Destructeur :
+- Pour touts les clients cree, on close la socket de chaque clients puis on le delete. 
 - Si la socket a ete cree (!= -1), on la ferme proprement.
 --> Ca libere les ressources systemes
 --> Ca evite que le port reste "occupe" et ne puisse pas relancer le serveur.
@@ -133,97 +138,103 @@ La signature :
       - backlog : Combien de connexions en attente ? Ici 10.
         --> La taille de la file d’attente des connexions entrantes.
 
+  # initPoll() :
+    
+    On cree une structure pollfd qui dit : 
+      - Ce fd correspond a _serverSocket (celui qui fait listen).
+      - Je veux etre notifie lorsqu'un client essaie de se connecter (POLLIN)
 
-  # acceptConnection() :
+      - Puis on ajoute ce serverSocket dans le tabeau que poll() surveillera
 
-    Partie 1: accetpt()
-    *int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);*
-      --> BLOQUE le programme jusqu'à ce qu'un client se connecte
-          Quand un client arrive, crée une NOUVELLE socket pour communiquer avec lui
-          Retourne le FD de cette nouvelle socket
-          
-      - socketfd : Sur QUELLE socket tu acceptes la connexions. Ici _serverSocket est la socket d'ecoute sur laquelle on a fait listent().
-      - struct sockaddr *addr : OÙ le kernel ecrit l'adresse du client. On donne au kernel une zone memoire ou on peux ecrire l'adresse du client. On remplis ici la structure, exemple: 
+      En gros Cette fonction Dit à poll() :
+    “Surveille mon socket serveur et préviens-moi quand un client essaie de se connecter.”
+
+  # acceptNewClient() :
+
+    Deja on prepare une structure pour recuperer les infos du clients (Port, IP) :
+    Ex pour  struct sockaddr_in clientAddr;
           clientAddr.sin_family  // AF_INET
           clientAddr.sin_port    // port du client
           clientAddr.sin_addr    // IP du client
-      - socklen_t *addrlen : C'est un parametre IN/OUT (entree, sortie). Systeme : 
-        Avant appel : "Voici la taille du buffer que je te donne."
-        Apres appel : "Voici la taille reelle que j'ai utilise."
 
-        Apres accetpt() :
-          👉 Ce que tu obtiens :
-          une NOUVELLE socket
-          connectée à UN client
-          prête à recv() / send()
-          ⚠️ IMPORTANT :
-          clientSocket ≠ _serverSocket
-          ils ont des rôles différents
       
-    Partie 2: recv()
-    *ssize_t recv(int sockfd, void *buf, size_t len, int flags);*
-      --> Lit les données envoyées par le client
-          Stocke ces données dans buffer
-          Retourne le nombre d'octets lus
-          Si retourne 0 : le client s'est déconnecté
-          Si retourne -1 : erreur
+    Partie 1: accetpt()
+    *int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);*
+      --> On accepte la connexion.
+        Ce que ça fait :
+      - Retire la connexion en attente dans la file listen()
+      - Crée une nouvelle socket dédiée à ce client
+      - Retourne son fd
+  Important :
+  -> _serverSocket reste le socket principal
+  -> clientSocket est une nouvelle socket spécifique à ce client
+          
+      - socketfd : Sur QUELLE socket tu acceptes la connexions. Ici _serverSocket est la socket d'ecoute sur laquelle on a fait listent().
+      - struct sockaddr &Clientaddr : OÙ le kernel ecrit l'adresse du client. On donne au kernel une zone memoire ou on peux ecrire l'adresse du client.
+      - socklen_t &clientLen : C'est un parametre IN/OUT (entree, sortie). Pour avoir la taille reel du buffer utilise
+      
+    Partie 2: fcntl()
+    *fcntl(clientSocket, F_SETFL, O_NONBLOCK);*
+      TRES IMPORTANT. Pour mettre la socket du client en non bloquante
 
-      - socketfd : La socket sur laquelle on recois.
-      - *buf : Adresse memoire ou les donnees recus seront ecrites
-      - len : Nombre max d'octects a lire, Ici sizeof(buffer) - 1 pour laisser de la place pour le '\0'
-      - flags : Option de reception. Ici 0. 
+  # addClient() :
+    On cree un nouvel objet Client associe a ce fd (qui vient d'un accept).
+    On l'ajoute a la liste de tout les clients que le Server connait.
+    On crée une structure pollfd pour ce client.
+      fd = fd → on surveille ce client
+      events = POLLIN → on veut savoir quand il envoie un message
+      revents = 0 → initialisation propre
+    On ajoute ce client dans la liste surveille par poll(). 
 
-    Partie 3: send() 
-    *ssize_t send(int sockfd, const void *buf, size_t len, int flags);*
-      --> Envoie des données au client
-          On envoie d'abord "Echo: "
-          Puis on renvoie ce que le client a envoyé
+  # removeClient() :
+    --> On supprime un client du serveur
+    --> On libère sa mémoire
+    --> On l’enlève de poll()
+    --> On ferme sa socket
 
-      - socketfd : La socket client qui a ete retorunee par accept().
-      - buf : Adresse des donnees a envoyer. Ex: send(clientSocket, "Hello", 5, 0);
-      - len: Nombre d'octets a envoyer
-      - flags: Option d'envoie. Ici 0.
+  # getClientByFd() 
+    --> Rechercher un client grace a son FD.
+  
+  # handleClientData()
+    --> On lit les données envoyées par un client
+    --> On les ajoute à son buffer interne
+    --> On extrait les messages complets (\r\n)
+    --> On affiche chaque message
+    --> Si le client est parti → on le supprime
 
-  En gros : 
-  “Donne-moi une nouvelle socket correspondant à un client connecté, et écris son adresse dans clientAddr.”
-
-    recv → le kernel écrit dans ton buffer
-    send → le kernel lit depuis ton buffer
-    toujours sur une socket connectée
-    jamais sur la socket serveur
-
-    Partie 4: close() 
-    *close(clientSocket);*
-      --> Ferme la connexion avec ce client specifique.
-      _serverSocket reste ouverte (mais ici le proramme s'arrete).
-
-
-  # start() :
+  # run() :
   
     On lance toutle processus. 
     *Flux Complet d'Exécution*
 
 Voici ce qui se passe quand tu lances `./ircserv 6667 pass` :
-main()
+run()
   ↓
-Server server(6667, "pass")   // Constructeur
-  ↓
-server.start()
-  ↓
-  ├─ createSocket()           → socket() retourne FD 3
-  ├─ bindSocket()             → bind(3, "0.0.0.0:6667")
-  ├─ listenForConnections()   → listen(3, 10)
-  └─ acceptConnection()       → accept(3) [BLOQUE ICI]
-       ↓
-     [Un client se connecte]
-       ↓
-     accept() retourne FD 4
-       ↓
-     recv(4) → lit "Hello"
-       ↓
-     send(4) → envoie "Echo: Hello"
-       ↓
-     close(4)
+  ├─ createSocket()
+  │     → socket() retourne FD 3
+  │
+  ├─ bindSocket()
+  │     → bind(3, "0.0.0.0:6667")
+  │
+  ├─ listenForConnections()
+  │     → listen(3, backlog)
+  │
+  ├─ initPoll()
+  │     → ajoute FD 3 dans _pollFds
+  │     → events = POLLIN
+  │
+  └─ Affiche :
+        "Server running... Press Ctrl+C to stop"
+                   ┌───────────────┐
+                   │   poll()      │
+                   └───────┬───────┘
+                           │
+              ┌────────────┼────────────┐
+              │            │            │
+          Nouvelle      Données     Déconnexion
+          connexion     client      client
+              │            │            │
+        acceptNewClient  handleData  removeClient
 
 
 
@@ -239,6 +250,3 @@ server.start()
 | recv()                  | Lit les données envoyées par le client                         |
 | send()                  | Envoie des données au client                                   |
 | close()                 | Ferme une socket et libère le file descriptor                  |
-
-
-# 
