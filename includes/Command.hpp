@@ -6,7 +6,7 @@
 
 typedef struct s_command
 {
-	std::string					prefix;
+	std::string					id;
 	std::string 				command; // PASS, NICK ...
 	std::vector<std::string>	params; // ["Alice", "0", "*"], ["secret"] ...
 }	t_command;
