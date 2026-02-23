@@ -9,6 +9,7 @@ typedef struct s_command
 	std::string					id;
 	std::string 				command; // PASS, NICK ...
 	std::vector<std::string>	params; // ["Alice", "0", "*"], ["secret"] ...
+	std::string					brut; //Debug
 }	t_command;
 
 #endif
