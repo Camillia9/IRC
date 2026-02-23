@@ -115,10 +115,7 @@ La signature :
     VISUALISATION GLOBAL : “Cette socket doit utiliser CETTE adresse réseau précise.”
     Concretement : “Associe cette socket à l’adresse IPv4 décrite par _serverAddr (port + IP), en lisant exactement la taille de cette structure.”
 
-  bind() :
-      - Associe la socket au port spécifié
-      - "Réserve" le port pour ton serveur
-      - Après ça, aucun autre programme ne peut utiliser ce port
+  --> bind() réserve un port pour ta socket serveur. Tu dis au système d'exploitation : "Cette socket va écouter sur le port 6667. Personne d'autre ne peut utiliser ce port maintenant."
 
    - sockfd : _serverSocket : C’est la socket que tu veux attacher à une adresse. Grace a bind() ce fd devient associé à un port + IP
    - const struct sockaddr *addr : L'adresse a laquelle la socket est attachee. bind() doit pouvoir fonctionner avec IPv4 IPv6 etc. Donc elle prend : "const struct sockaddr *". Mais nous on travail en IPv4 (sockaddr_in), c'est pourquoi on cast: (struct sockaddr *)&_serverAddr. Maintenant le port et l'IP sont bien interprete.

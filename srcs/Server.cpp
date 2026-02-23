@@ -135,6 +135,13 @@ void Server::handleClientData(int fd)
 		for (size_t i = 0; i < msg.size(); i++) {
 			std::cout << msg[i] << std::endl;
 		}
+	//	for (size_t j = 0; j < msg.size(); ++j)
+	//	{
+	//	    std::cout << "💬 Client FD " << fd << " sent: " << msg[j] << std::endl;
+		
+	//	    t_command cmd = parseMessage(msg[j]);
+	//	    executeCommand(client, cmd);
+	//	}
 	}
 	else {
 		removeClient(fd);

@@ -6,7 +6,9 @@ INCLUDES    = -I includes
 
 SRCS        = srcs/main.cpp \
               srcs/Server.cpp \
-			  srcs/Client.cpp
+			  srcs/Client.cpp \
+			  srcs/Replies.cpp \
+			  srcs/Execution.cpp \
 
 OBJDIR      = obj
 OBJS        = $(SRCS:srcs/%.cpp=$(OBJDIR)/%.o)
