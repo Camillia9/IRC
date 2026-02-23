@@ -1,5 +1,5 @@
 #include "parser.hpp"
-// #include "Command.hpp"
+#include "Command.hpp"
 
 std::string	read_word(const std::string &line, size_t &i)
 {
@@ -106,9 +106,9 @@ std::string	read_command(const std::string &line, size_t &i)
 }
 
 
-MessClient parse_line(const std::string &line)
+t_command parse_line(const std::string &line)
 {
-	MessClient	msg;
+	t_command	msg;
 	size_t	i = 0;
 
 	msg.brut = line; msg.id = read_id(line, i);

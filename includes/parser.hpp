@@ -1,20 +1,22 @@
 #ifndef PARSER_HPP
 #define PARSER_HPP
 
+#include "Command.hpp"
+
 #include <string>
 #include <vector>
 
-struct MessClient
-{
-	std::string id;
-	std::string command;
-	std::vector<std::string> params;
-	std::string brut; //pr debugg pcq I'm just a girl
+// struct MessClient
+// {
+// 	std::string id;
+// 	std::string command;
+// 	std::vector<std::string> params;
+// 	std::string brut; //pr debugg pcq I'm just a girl
 
-};
+// };
 
 
-MessClient parse_line(const std::string &line);
+t_command parse_line(const std::string &line);
 std::string	read_word(const std::string &line, size_t &i);
 void	skip_spaces(const std::string &line, size_t &i);
 std::string	read_id(const std::string &line, size_t &i);
