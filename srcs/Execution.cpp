@@ -23,19 +23,22 @@ void executeCommand(Server &server, Client &client, const t_command &cmd)
 		return;
 
 	if (name == "PASS")
-		execPass(&client, cmd, server._password);
+		execPass(&client, cmd, server.getPassword());
 
 	else if (name == "NICK")
-		execNick(&client, cmd, server._clients);
+		execNick(&client, cmd, server.getClients());
 
 	else if (name == "USER")
 		execUser(&client, cmd);
 
 	else if (name == "JOIN")
-		blabla;
+		execJoin(&client, cmd, &server);
+
+	else if (name == "PART")
+		execPart(&client, cmd, &server);
 
 	else
-		autre;
+		std::cout << "Unknown command : " << name << std::endl;;
 }
 
 

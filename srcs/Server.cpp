@@ -109,7 +109,7 @@ void Server::removeClient(int fd)
 	close(fd);
 }
 
-const std::string& Server::getPassword()const
+const std::string& Server::getPassword()const 
 {
 	return _password;
 }
@@ -128,10 +128,10 @@ Client *Server::getClientByFd(int fd)
 		return NULL;
 }
 
-Client *Server::getClientByNick(const std::string &nick)
-{
+// Client *Server::getClientByNick(const std::string &nick)
+// {
 
-}
+// }
 
 void Server::handleClientData(int fd)
 {
