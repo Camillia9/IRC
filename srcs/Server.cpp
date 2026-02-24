@@ -121,20 +121,26 @@ Client *Server::getClientByFd(int fd)
 void Server::handleClientData(int fd)
 {
 	Client *client = getClientByFd(fd);
-	if (!client) {
+	if (!client) 
+	{
 		std::cerr << "Client not found" << std::endl;
 		return;
 	}
-	char buffer[1024];
+	char buffer[1024]; //
 	std::memset(buffer, 0, sizeof(buffer));
 
 	int bytesRead = recv(fd, buffer, sizeof(buffer) - 1, 0);
-	if (bytesRead > 0) {
+	
+	if (bytesRead > 0) 
+	{
 		client->appendToBuffer(buffer);
+		
 		std::vector<std::string> msg = client->extractMessages();
-		for (size_t i = 0; i < msg.size(); i++) {
+		
+		for (size_t i = 0; i < msg.size(); i++)
 			std::cout << msg[i] << std::endl;
-		}
+	
+
 	//	for (size_t j = 0; j < msg.size(); ++j)
 	//	{
 	//	    std::cout << "💬 Client FD " << fd << " sent: " << msg[j] << std::endl;
@@ -142,8 +148,11 @@ void Server::handleClientData(int fd)
 	//	    t_command cmd = parseMessage(msg[j]);
 	//	    executeCommand(client, cmd);
 	//	}
+
 	}
-	else {
+
+	else 
+	{
 		removeClient(fd);
 	}
 

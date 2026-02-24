@@ -15,7 +15,7 @@ int main()
 		if (!std::getline(std::cin, line))
 			break;
 
-		MessClient msg = parse_line(line);
+		t_command msg = parse_line(line);
 
 		std::cout << "\n--- RESULTAT ---" << std::endl;
 

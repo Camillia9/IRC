@@ -3,6 +3,7 @@
 
 #include "Client.hpp"
 #include "Command.hpp"
+#include "Server.hpp"
 #include <string>
 #include <iostream>
 #include <sstream>

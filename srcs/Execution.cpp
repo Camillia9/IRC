@@ -1,5 +1,45 @@
 #include "Replies.hpp"
 
+
+
+// void	executeCommand(Server &server, Client &client, const t_command &cmd)
+// {
+// 	static std::map<std::string, CommandHandler> listeCommandes;
+
+// 	if (listeCommandes)
+// 	{
+
+// 	}
+
+// }
+
+
+void executeCommand(Server &server, Client &client, const t_command &cmd)
+{
+
+	const std::string &name = cmd.command;
+
+	if (name.empty())
+		return;
+
+	if (name == "PASS")
+		execPass(&client, cmd, server._password);
+
+	else if (name == "NICK")
+		execNick(&client, cmd, server._clients);
+
+	else if (name == "USER")
+		execUser(&client, cmd);
+
+	else if (name == "JOIN")
+		blabla;
+
+	else
+		autre;
+}
+
+
+
 void execPass(Client *client, const t_command &cmd, const std::string &serverPasswd)
 {
 	if (client->isAuthenticated())

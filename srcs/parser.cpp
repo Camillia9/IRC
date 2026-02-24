@@ -111,7 +111,7 @@ t_command parse_line(const std::string &line)
 	t_command	msg;
 	size_t	i = 0;
 
-	msg.brut = line; msg.id = read_id(line, i);
+	// msg.brut = line; msg.id = read_id(line, i);
 	msg.command = read_command(line, i);
 	std::transform(msg.command.begin(), msg.command.end(), msg.command.begin(), ::toupper);
 	msg.params = read_param(line, i);
