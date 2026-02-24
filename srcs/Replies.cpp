@@ -78,3 +78,93 @@ void IRC::errNickInuse(Client *client, const std::string &nick)
 	std::string rep = oss.str();
 	send(client->getFd(), rep.c_str(), rep.size(), 0);
 }
+
+void IRC::rplNoTopic(Client *client, const std::string &chanel)
+{
+	std::ostringstream oss;
+	oss << ":ircserv 331 " << client->getNickname() << " " << chanel << " :No topic is set\r\n";
+
+	std::string rep = oss.str();
+	send(client->getFd(), rep.c_str(), rep.size(), 0);
+}
+
+void IRC::rplTopic(Client *client, const std::string &chanel, const std::string &topic)
+{
+	std::ostringstream oss;
+	oss << ":ircserv 332 " << client->getNickname() << " " << chanel << " :" << topic << "\r\n";
+	
+	std::string rep = oss.str();
+	send(client->getFd(), rep.c_str(), rep.size(), 0);
+}
+
+void IRC::rplNameReply(Client *client, const std::string &chanel, const std::string &names)
+{
+	std::ostringstream oss;
+	oss << ":ircserv 353 " << client->getNickname() << " = " << chanel << " :" << names << "\r\n";
+
+	std::string rep = oss.str();
+	send(client->getFd(), rep.c_str(), rep.size(), 0);
+}
+
+void IRC::rplEndOfNames(Client *client, const std::string &chanel)
+{
+	std::ostringstream oss;
+	oss << ":ircserv 366 " << client->getNickname() << " " << chanel << " :End of /NAMES list\r\n";
+
+	std::string rep = oss.str();
+	send(client->getFd(), rep.c_str(), rep.size(), 0);
+}
+
+void IRC::errNotOnChannel(Client *client, const std::string &chanel)
+{
+	std::ostringstream oss;
+	oss << ":ircserv 442 " << client->getNickname() << " " << chanel << " :You're not on that chanel\r\n";
+
+	std::string rep = oss.str();
+	send(client->getFd(), rep.c_str(), rep.size(), 0);
+}
+
+void IRC::errNoSuchChannel(Client *client, const std::string &chanel)
+{
+	std::ostringstream oss;
+	oss << ":ircserv 403 " << client->getNickname() << " " << chanel << " :No such chanel\r\n";
+
+	std::string rep = oss.str();
+	send(client->getFd(), rep.c_str(), rep.size(), 0);
+}
+
+void IRC::errNoRecipient(Client *client, const t_command &command)
+{
+	std::ostringstream oss;
+	oss << ":ircserv 411 " << client->getNickname() << " :No recipient given (" << command.command << ")\r\n";
+
+	std::string rep = oss.str();
+	send(client->getFd(), rep.c_str(), rep.size(), 0);
+ }
+
+ void IRC::errNoTextSend(Client *client)
+ {
+	std::ostringstream oss;
+	oss << ":ircserv 412 " << client->getNickname() << " :No text to send\r\n";
+
+	std::string rep = oss.str();
+	send(client->getFd(), rep.c_str(), rep.size(), 0);
+ }
+
+ void IRC::errNoSuchNick(Client *client, const std::string &target)
+ {
+	std::ostringstream oss;
+	oss << ":ircserv 401 " << client->getNickname() << " " << target << " :No such nick/channel\r\n";
+
+	std::string rep = oss.str();
+	send(client->getFd(), rep.c_str(), rep.size(), 0);
+ }
+
+ void IRC::errCannotSendToChan(Client *client, const std::string &channel)
+ {
+	std::ostringstream oss;
+	oss << ":ircserv 404 " << client->getNickname() << " " << channel << " :Cannot send to channel\r\n";
+
+	std::string rep = oss.str();
+	send(client->getFd(), rep.c_str(), rep.size(), 0);
+ }

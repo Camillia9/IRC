@@ -109,6 +109,16 @@ void Server::removeClient(int fd)
 	close(fd);
 }
 
+const std::string& Server::getPassword()const
+{
+	return _password;
+}
+
+const std::vector<Client*>& Server::getClients()const
+{
+	return _clients;
+}
+
 Client *Server::getClientByFd(int fd)
 {
 	for (size_t i = 0; i < _clients.size(); i++) {
@@ -116,6 +126,11 @@ Client *Server::getClientByFd(int fd)
 			return _clients[i];
 		}
 		return NULL;
+}
+
+Client *Server::getClientByNick(const std::string &nick)
+{
+
 }
 
 void Server::handleClientData(int fd)
