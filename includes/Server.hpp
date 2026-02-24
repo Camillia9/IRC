@@ -34,14 +34,15 @@ private:
 	Client*  getClientByFd(int fd); // Retrouver un client par son FD
 	Client*	getClientByNick(const std::string &nick); // Retrouver un client par son nick
 
-	const std::string&	getPassword()const;
-	const std::vector<Client*>& getClients()const;
 
 public:
 	Server(int port, const std::string &password);	// Constructeur
 	~Server();										// Destructeur
 	
 	void run();               		// Boucle principale
+
+	const std::string&	getPassword()const;
+	const std::vector<Client*>& getClients()const;
 };
 
 #endif

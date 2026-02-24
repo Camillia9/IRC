@@ -1,5 +1,48 @@
 #include "Replies.hpp"
 
+
+
+// void	executeCommand(Server &server, Client &client, const t_command &cmd)
+// {
+// 	static std::map<std::string, CommandHandler> listeCommandes;
+
+// 	if (listeCommandes)
+// 	{
+
+// 	}
+
+// }
+
+
+void executeCommand(Server &server, Client &client, const t_command &cmd)
+{
+
+	const std::string &name = cmd.command;
+
+	if (name.empty())
+		return;
+
+	if (name == "PASS")
+		execPass(&client, cmd, server.getPassword());
+
+	else if (name == "NICK")
+		execNick(&client, cmd, server.getClients());
+
+	else if (name == "USER")
+		execUser(&client, cmd);
+
+	else if (name == "JOIN")
+		execJoin(&client, cmd, &server);
+
+	else if (name == "PART")
+		execPart(&client, cmd, &server);
+
+	else
+		std::cout << "Unknown command : " << name << std::endl;;
+}
+
+
+
 void execPass(Client *client, const t_command &cmd, const std::string &serverPasswd)
 {
 	if (client->isAuthenticated())
@@ -121,6 +164,7 @@ void execPart(Client *client, const t_command &cmd, Server *server)
 
 	
 }
+
 
 void execPrvMsg(Client *client, const t_command &cmd, Server *server)
 {

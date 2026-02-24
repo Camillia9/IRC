@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map> //bon testons les maps
 
 typedef struct s_command
 {
