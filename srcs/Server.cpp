@@ -130,7 +130,11 @@ Client *Server::getClientByFd(int fd)
 
 Client *Server::getClientByNick(const std::string &nick)
 {
-
+	for (size_t i = 0; i < _clients.size(); i++) {
+		if (_clients[i]->getNickname() == nick)
+			return _clients[i];
+	}
+	return NULL;
 }
 
 void Server::handleClientData(int fd)

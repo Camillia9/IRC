@@ -121,3 +121,14 @@ void execPart(Client *client, const t_command &cmd, Server *server)
 
 	
 }
+
+void execPrvMsg(Client *client, const t_command &cmd, Server *server)
+{
+	if (!client->isRegistered())
+		return;
+	else if (cmd.params.empty()) {
+		IRC::errMoreParams(client, cmd);
+		return;
+	}
+	
+}
