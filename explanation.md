@@ -318,3 +318,10 @@ Dépendances
 ❌ Aucune (peut commencer après Intégration 3)
 
 
+
+
+
+
+
+
+EXECUTE COMMAND : JE METS LE PRTOTYPE DANS SA CLASSE SERVER EN PV  
