@@ -14,32 +14,7 @@
 // }
 
 
-void	Server::executeCommand(Client &client, const t_command &cmd)
-{
 
-	const std::string &name = cmd.command;
-
-	if (name.empty())
-		return;
-
-	if (name == "PASS")
-		execPass(&client, cmd, _password);
-
-	else if (name == "NICK")
-		execNick(&client, cmd, _clients);
-
-	else if (name == "USER")
-		execUser(&client, cmd);
-
-	// else if (name == "JOIN")
-	// 	execJoin(&client, cmd, &server);
-
-	// else if (name == "PART")
-	// 	execPart(&client, cmd, &server);
-
-	else
-		std::cout << "Unknown command : " << name << std::endl;;
-}
 
 
 
@@ -101,78 +76,78 @@ void execUser(Client *client, const t_command &cmd)
 	}	
 }
 
-void execJoin(Client *client, const t_command &cmd, Server *server)
-{
-	if (!client->isRegistered())
-		return;
-	else if (cmd.params.empty()) {
-		IRC::errMoreParams(client, cmd);
-		return;
-	}
+//void execJoin(Client *client, const t_command &cmd, Server *server)
+//{
+//	if (!client->isRegistered())
+//		return;
+//	else if (cmd.params.empty()) {
+//		IRC::errMoreParams(client, cmd);
+//		return;
+//	}
 
-	std::string channelName = cmd.params[0];
+//	std::string channelName = cmd.params[0];
 
-	if (channelName[0] != '#') {
-		IRC::errNoSuchChannel(client, channelName);
-		return;
-	}
-	// 1. Verifier le format : (au moins un char apres '#', alphanumeric, '_', '-') 
-		// Si invalide errNoSuchChanel
+//	if (channelName[0] != '#') {
+//		IRC::errNoSuchChannel(client, channelName);
+//		return;
+//	}
+//	// 1. Verifier le format : (au moins un char apres '#', alphanumeric, '_', '-') 
+//		// Si invalide errNoSuchChanel
 	
-	// 2. Verifier si le channel existe, si non il se cree automatiquement
+//	// 2. Verifier si le channel existe, si non il se cree automatiquement
 
-	// 3. Ajouter le client au channel
-			// Le client doit etre dans la liste des membres du channel
-			// Le channel doit etre dans la liste des channels du client
+//	// 3. Ajouter le client au channel
+//			// Le client doit etre dans la liste des membres du channel
+//			// Le channel doit etre dans la liste des channels du client
 
-	// 4. Notifier les autres membres du channel et lui-meme
-		// ":nick!user@host JOIN #channel"
+//	// 4. Notifier les autres membres du channel et lui-meme
+//		// ":nick!user@host JOIN #channel"
 
-	// 5. Envoyer le topic s'il existe (code 332/331)
+//	// 5. Envoyer le topic s'il existe (code 332/331)
 
-	// 6. Envoyer la liste des membres (le premier avec un '@') rpl 353,
-		// Puis envoyer Le EOF rpl 366
-}
+//	// 6. Envoyer la liste des membres (le premier avec un '@') rpl 353,
+//		// Puis envoyer Le EOF rpl 366
+//}
 
-void execPart(Client *client, const t_command &cmd, Server *server)
-{
-	if (!client->isRegistered())
-		return;
-	else if (cmd.params.empty()) {
-		IRC::errMoreParams(client, cmd);
-		return;
-	}
+//void execPart(Client *client, const t_command &cmd, Server *server)
+//{
+//	if (!client->isRegistered())
+//		return;
+//	else if (cmd.params.empty()) {
+//		IRC::errMoreParams(client, cmd);
+//		return;
+//	}
 
-	std::string channelName = cmd.params[0];
+//	std::string channelName = cmd.params[0];
 
-	if (channelName[0] != '#') {
-		IRC::errNoSuchChannel(client, channelName);
-		return;
-	}
-	// 1. Verifier que le channel existe
+//	if (channelName[0] != '#') {
+//		IRC::errNoSuchChannel(client, channelName);
+//		return;
+//	}
+//	// 1. Verifier que le channel existe
 
-	// 1.5. Verifier que le client est bien dans le channel. Si non rpl 442
+//	// 1.5. Verifier que le client est bien dans le channel. Si non rpl 442
 
-	// 2. Envoyer un message a tous les membres du channel (y compris celui qui part) :
-		// ":nick!user@host PART #channel"
-			// Si le client envoie message optionnel : PART #channel :bye
-			// Alors le message recu : ":nick!user@host PART #channel :bye"
+//	// 2. Envoyer un message a tous les membres du channel (y compris celui qui part) :
+//		// ":nick!user@host PART #channel"
+//			// Si le client envoie message optionnel : PART #channel :bye
+//			// Alors le message recu : ":nick!user@host PART #channel :bye"
 
-	// 3. Retirer le client de channel->_members et de client->_channels
+//	// 3. Retirer le client de channel->_members et de client->_channels
 
-	// 4. Si vide, supprimer le channesls
+//	// 4. Si vide, supprimer le channesls
 
 	
-}
+//}
 
 
-void execPrvMsg(Client *client, const t_command &cmd, Server *server)
-{
-	if (!client->isRegistered())
-		return;
-	else if (cmd.params.empty()) {
-		IRC::errMoreParams(client, cmd);
-		return;
-	}
+//void execPrvMsg(Client *client, const t_command &cmd, Server *server)
+//{
+//	if (!client->isRegistered())
+//		return;
+//	else if (cmd.params.empty()) {
+//		IRC::errMoreParams(client, cmd);
+//		return;
+//	}
 	
-}
+//}

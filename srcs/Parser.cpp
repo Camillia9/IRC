@@ -1,5 +1,6 @@
 #include "parser.hpp"
 #include "Command.hpp"
+#include <algorithm>
 
 std::string	read_word(const std::string &line, size_t &i)
 {
@@ -81,8 +82,8 @@ std::vector<std::string>	read_param(const std::string &line, size_t &i)
 			//break;
 			std::string last = line.substr(i);
 
-			while (!last.empty() && (last.back() == '\r' || last.back() == '\n'))
-				last.pop_back();
+			while (!last.empty() && (last[last.size() - 1] == '\r' || last[last.size() - 1] == '\n'))
+    			last.erase(last.size() - 1);
 
 			params.push_back(last);
 			break;
