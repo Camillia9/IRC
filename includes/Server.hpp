@@ -2,6 +2,10 @@
 #define SERVER_HPP
 
 #include "Client.hpp"
+#include "Replies.hpp"
+#include "parser.hpp"
+
+
 #include <iostream>
 #include <cstdlib>
 #include <string>
@@ -13,6 +17,8 @@
 #include <poll.h>
 #include <fcntl.h>
 #include <signal.h>
+
+
 
 class Server {
 private:
@@ -43,6 +49,10 @@ public:
 
 	const std::string&	getPassword()const;
 	const std::vector<Client*>& getClients()const;
+
+	void executeCommand(Client &client, const t_command &cmd);
 };
+
+
 
 #endif

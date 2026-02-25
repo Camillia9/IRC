@@ -153,8 +153,23 @@ void Server::handleClientData(int fd)
 		std::vector<std::string> msg = client->extractMessages();
 		
 		for (size_t i = 0; i < msg.size(); i++)
-			std::cout << msg[i] << std::endl;
-	
+			// std::cout << msg[i] << std::endl;
+		{
+
+			t_command cmd = parse_line(msg[i]);
+
+			// cmd.brut = line;
+
+			executeCommand(*client, cmd);
+        }
+	}
+
+	else 
+	{
+		removeClient(fd);
+	}
+
+}
 
 	//	for (size_t j = 0; j < msg.size(); ++j)
 	//	{
@@ -164,14 +179,7 @@ void Server::handleClientData(int fd)
 	//	    executeCommand(client, cmd);
 	//	}
 
-	}
 
-	else 
-	{
-		removeClient(fd);
-	}
-
-}
 
 void Server::run()
 {
