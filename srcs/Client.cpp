@@ -79,7 +79,7 @@ void Client::setRegistered(bool reg)
 void Client::appendToBuffer(const std::string& data)
 {
 	_recvBuffer += data;
-	std::cout << "Buffer FD " << _fd << " (" << _recvBuffer.size() << " bytes: [" << _recvBuffer << "]" << std::endl;
+	//std::cout << "Buffer FD " << _fd << " (" << _recvBuffer.size() << " bytes: [" << _recvBuffer << "]" << std::endl;
 }
 
 std::vector<std::string> Client::extractMessages()
@@ -93,7 +93,7 @@ std::vector<std::string> Client::extractMessages()
 		if (!msg.empty())
 		{
 			messages.push_back(msg);
-			std::cout << "Message extracted: [" << msg << "]" << std::endl;
+			//std::cout << "Message extracted: [" << msg << "]" << std::endl;
 		}
 		_recvBuffer.erase(0, pos + 2);
 	}

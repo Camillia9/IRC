@@ -45,7 +45,9 @@ bool isValidNick(const std::string &str) {
 
 void execNick(Client *client, const t_command &cmd, const std::vector<Client*> &clients)
 {
-    if (cmd.params.empty())
+	if (!client->isAuthenticated())
+		return;
+    else if (cmd.params.empty())
         IRC::errNoNickGiven(client);
     else if (!isValidNick(cmd.params[0]) || cmd.params[0].size() > 9)
         IRC::errNickChar(client);
@@ -64,7 +66,9 @@ void execUser(Client *client, const t_command &cmd)
 {
 	if (!client->isAuthenticated())
 		return;
-	else if (cmd.params.size() < 4)
+	if (client->getNickname().empty())
+		return;
+	else if (cmd.params.size() != 4)
 		IRC::errMoreParams(client, cmd);
 	else if (client->isRegistered())
 		IRC::errAlreadyReg(client);
@@ -141,13 +145,37 @@ void execUser(Client *client, const t_command &cmd)
 //}
 
 
-//void execPrvMsg(Client *client, const t_command &cmd, Server *server)
-//{
-//	if (!client->isRegistered())
-//		return;
-//	else if (cmd.params.empty()) {
-//		IRC::errMoreParams(client, cmd);
-//		return;
-//	}
+void execPrvMsg(Client *client, const t_command &cmd, Server *server)
+{
+	if (!client->isRegistered())
+		return;
+	if (cmd.params.empty()) {
+		IRC::errNoRecipient(client, cmd);
+		return;
+	}
+	if (cmd.params.size() < 2) {
+		IRC::errNoTextSend(client);
+		return;
+	}
+
+	std::string target = cmd.params[0]; // Destinataire
+	std::string message = cmd.params[1]; 
 	
-//}
+	if (target[0] == '#') {
+		// Boucler sur les channels existant
+		// Verifier si existant
+		// ERR_NOSUCHANEL
+		// Boucler sur les utilsateurs du channels
+		// Verifier que l'utilisateurs est membres
+		// ERR_CANNOTSENDTOCHAN
+		// Envoyer le message a tous les embres sauf a lui-meme 		
+	}
+	else {
+		Client *recipient = server->getClientByNick(target);
+		if (!recipient) {
+			IRC::errNoSuchNick(client, target);
+			return;
+		}
+		send(recipient->getFd(), fullMsg.c_str(), fullMsg.size(), 0);
+	}
+}
