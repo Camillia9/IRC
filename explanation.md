@@ -124,7 +124,12 @@ DEF : Grp nommé d'1 ou plusieurs clients qui recevront ts les mess adressés à
 Nom de canal = str (commençant pr un char '&' ou '#') d'une longueur max de 200 char. En dehors du fait que le prems char doive être un '&' ou un '#', la seule restriction sur le nom d'un canal est qu'il ne peut ps contenir d'espace (' '), de contrôle G (^G ou ASCII 7), ou de virgule (',' qui est utilisée comme séparateur de liste dans le protocole).
 
 
+COMPO :
 
+		- son nom 
+		- ses membres
+		- ses opérateurs (cf CLIENT / Opérateur) (= admin)
+		- ses modes ()
 
 
 PRIVMSG et NOTICE -> seuls mess dispo qui réalisent effectivement l'acheminement d'un message textuel d'un client à un autre - le reste le rend juste possible & assure que cela se passe de façon fiable et structurée.
@@ -173,6 +178,9 @@ Qd un client se connecte à un serveur -> ils s'envoient un flux d'octets -> mes
                         
 
 Une ligne 
+
+
+
 
 
 
@@ -263,9 +271,9 @@ Use wireshark / a custom proxy etc… to inspect communication between your refe
 
 
 
- Créer le système de dispatch des commandes
-
-
+ 
+ 
+ Créer le système de dispatch des commandes : 
 
 
  void executeCommand(Server &server, Client &client, const t_command &cmd)
@@ -293,7 +301,7 @@ Use wireshark / a custom proxy etc… to inspect communication between your refe
 }
 
 
-
+à faire : EXECUTE COMMAND : JE METS LE PRTOTYPE DANS SA CLASSE SERVER EN PV  
 
 
 # 📅 PHASE 4 : Channels et messages (6-7 jours)
@@ -318,10 +326,25 @@ Dépendances
 ❌ Aucune (peut commencer après Intégration 3)
 
 
+						PHASE 4 : CHANNELS ET MESSAGES 
+
+
+- Créat° classe Channel
+- Gest° ds le serveur
+- Opérat° sur les channels
 
 
 
 
+						QUE DOIT CONTENIR MA CLASSE ?
 
 
-EXECUTE COMMAND : JE METS LE PRTOTYPE DANS SA CLASSE SERVER EN PV  
+-nom
+-membres
+-modes
+-opérateurs 
+
+
+
+
+NB deletechannelifempty
