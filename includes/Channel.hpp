@@ -16,7 +16,7 @@ class Channel
 				~Channel();
 
 
-				const std::string& getName() const; //fait
+				const std::string&	getName() const; //fait
 				const std::map<std::string, Client*>& getMembers() const; //pr cam i think
 				const std::string& getTopic() const; //fait
 
@@ -30,8 +30,9 @@ class Channel
 				bool	isOperator(const std::string& nick) const; // fait
 				void	removeOperator(Client* client); // à faire 
 
-				void	broadcast(const std::string& message, Client* sender = NULL); // en cours de reflexion, done
-				// void broadcast(const std::string& message, Client* sender = NULL);
+				void	broadcast(const std::string& message, Client* sender = NULL); // done
+			
+				std::string	getMembersList() const; //pour Cam son utilité ça je sais pas
 
 				bool	isEmpty() const; //fait
 

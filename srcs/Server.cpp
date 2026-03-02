@@ -242,3 +242,77 @@ void Server::run()
 	}
 	
 }
+
+
+
+bool Server::doesChannelExist(const std::string& channelName) const
+{
+	return (_channels.find(channelName) != _channels.end());
+}
+
+
+bool Server::isValidChannelName(const std::string& channelName) const
+{
+    if (channelName.empty())
+        return (false);
+    
+    if (channelName[0] != '#' && channelName[0] != '&')
+        return (false);
+    
+    return (true);
+}
+
+Channel*	Server::findChannel(const std::string& channelName)
+{
+	std::map<std::string, Channel*>::iterator i = _channels.find(channelName);
+
+	if (i != _channels.end())
+		return (i->second);
+	return (NULL);
+}
+
+Channel*	Server::createChannel(const std::string& channelName)
+{
+	if (!isValidChannelName(channelName))
+	{
+		std::cerr << "Invalid channel name: " << channelName << std::endl;
+		return (NULL);
+	}
+
+	if (doesChannelExist(channelName))
+	{
+		std::cerr << "Channel " << channelName << " already exists" << std::endl;
+		return (findChannel(channelName));
+	}
+
+	Channel* newChannel = new Channel(channelName);
+	_channels[channelName] = newChannel;
+	std::cout << "Channel " << channelName << " created" << std::endl;
+
+	return (newChannel);
+}
+
+Channel*	Server::getOrCreateChannel(const std::string& channelName)
+{
+	Channel* channel = findChannel(channelName);
+
+	if (channel != NULL)
+        return (channel);
+
+	return (createChannel(channelName));
+}
+
+void Server::deleteChannelIfEmpty(const std::string& channelName)
+{
+	Channel* channel = findChannel(channelName);
+
+	if (channel == NULL)
+		return;
+
+	if (!channel->isEmpty())
+		return;
+    
+	std::cout << "Deleting empty channel " << channelName << std::endl;
+	delete channel;
+	_channels.erase(channelName);
+}

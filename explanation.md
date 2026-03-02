@@ -334,17 +334,17 @@ Dépendances
 - Opérat° sur les channels
 
 
-
-
-						QUE DOIT CONTENIR MA CLASSE ?
-
-
--nom
--membres
--modes
--opérateurs 
-
-
-
-
 NB deletechannelifempty
+
+
+
+					ÉTAPE D'AJOUT DANS LE SERVEUR POUR CONNECTER
+
+
+
+
+
+
+
+
+
