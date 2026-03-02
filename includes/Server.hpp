@@ -5,6 +5,7 @@
 #include "Replies.hpp"
 #include "parser.hpp"
 #include "Execution.hpp"
+#include "Channel.hpp"
 
 
 #include <iostream>
@@ -18,6 +19,7 @@
 #include <poll.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <map>
 
 
 
@@ -39,9 +41,23 @@ private:
 	void removeClient(int fd);      // Client déconnecté
 	void addClient(int fd);			// Ajouter un client à la liste
 	Client*  getClientByFd(int fd); // Retrouver un client par son FD
-	
-	
-	public:
+	Client*	getClientByNick(const std::string &nick); // Retrouver un client par son nick
+
+	std::map<std::string, Channel*> _channels; // ts les channels
+
+
+
+	//gest° channel
+	bool doesChannelExist(const std::string& channelName) const;
+	bool isValidChannelName(const std::string& channelName) const;
+
+
+
+
+
+
+
+public:
 	Server(int port, const std::string &password);	// Constructeur
 	~Server();										// Destructeur
 	
@@ -52,6 +68,11 @@ private:
 	
 	Client*	getClientByNick(const std::string &nick); // Retrouver un client par son nick
 	void executeCommand(Client &client, const t_command &cmd);
+
+	Channel*	findChannel(const std::string& channelName);
+    Channel*	createChannel(const std::string& channelName);
+    Channel*	getOrCreateChannel(const std::string& channelName);
+    void	deleteChannelIfEmpty(const std::string& channelName);
 };
 
 
