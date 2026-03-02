@@ -1,4 +1,4 @@
-#include "Replies.hpp"
+#include "Execution.hpp"
 
 
 
@@ -28,19 +28,6 @@ void execPass(Client *client, const t_command &cmd, const std::string &serverPas
 		IRC::errPassMismatch(client);
 	else
 		client->setAuthenticated(true);
-}
-
-bool isSpecialChar(char c) {
-    return std::string("[]{}|\\").find(c) != std::string::npos;
-}
-
-bool isValidNick(const std::string &str) {
-    if (!isalpha(str[0]) && !isSpecialChar(str[0]))
-        return false;
-    for (size_t i = 1; i < str.size(); i++)
-        if (!isdigit(str[i]) && !isalpha(str[i]) && str[i] != '-')
-            return false;
-    return true;
 }
 
 void execNick(Client *client, const t_command &cmd, const std::vector<Client*> &clients)
@@ -80,69 +67,103 @@ void execUser(Client *client, const t_command &cmd)
 	}	
 }
 
-//void execJoin(Client *client, const t_command &cmd, Server *server)
-//{
-//	if (!client->isRegistered())
-//		return;
-//	else if (cmd.params.empty()) {
-//		IRC::errMoreParams(client, cmd);
-//		return;
-//	}
+void execJoin(Client *client, const t_command &cmd, Server *server)
+{
+	if (!client->isRegistered())
+		return;
+	else if (cmd.params.empty()) {
+		IRC::errMoreParams(client, cmd);
+		return;
+	}
 
-//	std::string channelName = cmd.params[0];
+	std::string channelName = cmd.params[0];
 
-//	if (channelName[0] != '#') {
-//		IRC::errNoSuchChannel(client, channelName);
-//		return;
-//	}
-//	// 1. Verifier le format : (au moins un char apres '#', alphanumeric, '_', '-') 
-//		// Si invalide errNoSuchChanel
+	if (channelName[0] != '#') {
+		IRC::errNoSuchChannel(client, channelName);
+		return;
+	}
+	if (!isValidChannelName(channelName)) {
+		IRC::errNoSuchChannel(client, channelName);
+		return;
+	}
+	// 2. Verifier si le channel existe, si non il se cree automatiquement :
+	bool isNewChannel = (server->getChannel(channelName) == NULL);
+	Channel *channel = server->getOrCreateChannel(); // Fcntion manquqnte
+
+	// 3. Ajouter le client au channel
+	channel->addMember(client);
+
+	if (isNewChannel)
+		channel->addOperator(client);
+	// 4. Notifier les autres membres du channel et lui-meme
+		// ":nick!user@host JOIN #channel"
+	std::string nick = client->getNickname();
+	std::string user = client->getUsername();
+	std::string JOINmsg = ":" + nick + "!" + user + "@host JOIN " + channelName + "\r\n";
+	channel->broadcast(JOINmsg); // Faire une fction broadcast avec juste une string en parametre et tout le monde recoit le message (y compris lui meme)
+
+	// 5. Envoyer le topic s'il existe (code 332/331)
+	if (channel->getTopic().empty())
+		IRC::rplNoTopic(client, channelName);
+	else
+		IRC::rplTopic(client, channelName, channel->getTopic());
+
+	// 6. Envoyer la liste des membres (le premier avec un '@') rpl 353,
+		// Puis envoyer Le EOF rpl 366
+
+	std::string names = channel->getMembersList(); //PB car getMembers renvoie une map
+	IRC::rplNameReply(client, channelName, names);
+	IRC::rplEndOfNames(client, channelName);
+}
+
+void execPart(Client *client, const t_command &cmd, Server *server)
+{
+	if (!client->isRegistered())
+		return;
+	else if (cmd.params.empty()) {
+		IRC::errMoreParams(client, cmd);
+		return;
+	}
+	std::string channelName = cmd.params[0];
+
+	if (channelName[0] != '#') {
+		IRC::errNoSuchChannel(client, channelName);
+		return;
+	}
+	// 1. Verifier que le channel existe
+	Channel *channel = server->getChannel(channelName);
+	if (!channel) {
+		IRC::errNoSuchChannel(client, channelName);
+		return;
+	}
+
+	// 1.5. Verifier que le client est bien dans le channel. Si non rpl 442
+	if (!channel->isMember(client->getNickname())) {
+		IRC::errNotOnChannel(client, channelName);
+		return;
+	}
+
+	// 2. Envoyer un message a tous les membres du channel (y compris celui qui part) : (avec ou sans raison en +)
+		// ":nick!user@host PART #channel"
+			// Si le client envoie message optionnel : PART #channel :bye
+			// Alors le message recu : ":nick!user@host PART #channel :bye"
+	std::string PartMsg = ":" + client->getNickname() + "!" + client->getUsername() + "@localhost PART " + channelName;
+	if (cmd.params.size() > 1)
+		PartMsg += " :" + cmd.params[1];
+	PartMsg += "\r\n";
+
+	// Brodcaster le PART a tout les membres (y compris celui qui part)
+	channel->broadcast(PartMsg);
+
+	// 3. Retirer le client du channel
+	channel->removeMember(client);
+	// retirer aussi le channel dans le clients ?
+
+	// 4. Si vide, supprimer le channesls
+	if (channel->isEmpty())
+		server->deleteChannel(channelName);
 	
-//	// 2. Verifier si le channel existe, si non il se cree automatiquement
-
-//	// 3. Ajouter le client au channel
-//			// Le client doit etre dans la liste des membres du channel
-//			// Le channel doit etre dans la liste des channels du client
-
-//	// 4. Notifier les autres membres du channel et lui-meme
-//		// ":nick!user@host JOIN #channel"
-
-//	// 5. Envoyer le topic s'il existe (code 332/331)
-
-//	// 6. Envoyer la liste des membres (le premier avec un '@') rpl 353,
-//		// Puis envoyer Le EOF rpl 366
-//}
-
-//void execPart(Client *client, const t_command &cmd, Server *server)
-//{
-//	if (!client->isRegistered())
-//		return;
-//	else if (cmd.params.empty()) {
-//		IRC::errMoreParams(client, cmd);
-//		return;
-//	}
-
-//	std::string channelName = cmd.params[0];
-
-//	if (channelName[0] != '#') {
-//		IRC::errNoSuchChannel(client, channelName);
-//		return;
-//	}
-//	// 1. Verifier que le channel existe
-
-//	// 1.5. Verifier que le client est bien dans le channel. Si non rpl 442
-
-//	// 2. Envoyer un message a tous les membres du channel (y compris celui qui part) :
-//		// ":nick!user@host PART #channel"
-//			// Si le client envoie message optionnel : PART #channel :bye
-//			// Alors le message recu : ":nick!user@host PART #channel :bye"
-
-//	// 3. Retirer le client de channel->_members et de client->_channels
-
-//	// 4. Si vide, supprimer le channesls
-
-	
-//}
+}
 
 
 void execPrvMsg(Client *client, const t_command &cmd, Server *server)
@@ -157,18 +178,28 @@ void execPrvMsg(Client *client, const t_command &cmd, Server *server)
 		IRC::errNoTextSend(client);
 		return;
 	}
-
 	std::string target = cmd.params[0]; // Destinataire
 	std::string message = cmd.params[1]; 
 	
+	std::string fullMsg = ":" + client->getNickname() + "!" + client->getUsername() + "@localhost PRIVMSG " + target + " :" + message + "\r\n";
+
 	if (target[0] == '#') {
 		// Boucler sur les channels existant
 		// Verifier si existant
 		// ERR_NOSUCHANEL
+		Channel *channel = server->getChannel(target);
+		if (!channel) {
+			IRC::errNoSuchChannel(client, target);
+			return;
+		}
 		// Boucler sur les utilsateurs du channels
 		// Verifier que l'utilisateurs est membres
-		// ERR_CANNOTSENDTOCHAN
-		// Envoyer le message a tous les embres sauf a lui-meme 		
+		if (!channel->isMember(client->getNickname())) {
+			IRC::errCannotSendToChan(client, target);
+			return;
+		}
+		// Envoyer le message a tous les embres sauf a lui-meme
+		channel->broadcast(fullMsg, client);	
 	}
 	else {
 		Client *recipient = server->getClientByNick(target);

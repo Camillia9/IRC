@@ -66,3 +66,38 @@ A Faire apres Channel :
                   << ": " << message << std::endl;
     }
 }
+
+
+// 2. Récupérer ou créer le channel
+bool isNewChannel = (server->getChannel(channelName) == NULL);
+Channel *channel = server->getOrCreateChannel(channelName);
+
+// 3. Ajouter le client au channel
+channel->addMember(client);
+
+// Si c'est un nouveau channel, le client devient opérateur
+if (isNewChannel)
+    channel->addOperator(client);
+
+
+
+    if (target[0] == '#')
+{
+    // Vérifier que le channel existe
+    Channel *channel = server->getChannel(target);
+    if (!channel)
+    {
+        IRC::errNoSuchNick(client, target);
+        return;
+    }
+    
+    // Vérifier que le client est membre
+    if (!channel->isMember(client->getNickname()))
+    {
+        IRC::errCannotSendToChan(client, target);
+        return;
+    }
+    
+    // Broadcaster à tous SAUF l'émetteur
+    channel->broadcast(fullMsg, client);
+}

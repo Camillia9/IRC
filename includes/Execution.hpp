@@ -3,11 +3,19 @@
 
 #include "Client.hpp"
 #include "Command.hpp"
+#include "Replies.hpp"
+#include "Channel.hpp"
 #include <vector>
 #include <string>
 
 // Forward declaration de Server (pour éviter une dépendance circulaire)
 class Server;
+
+// Utils
+bool isSpecialChar(char c);
+bool isValidNick(const std::string &str);
+bool isValidChannelName(const std::string &str);
+
 
 // Authentification
 void execPass(Client *client, const t_command &cmd, const std::string &password);
