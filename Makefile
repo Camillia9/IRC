@@ -10,6 +10,8 @@ SRCS        = srcs/main.cpp \
 			  srcs/Replies.cpp \
 			  srcs/Execution.cpp \
 			  srcs/Parser.cpp \
+			  srcs/Channel.cpp \
+			  srcs/Utils_exec.cpp 
 
 OBJDIR      = obj
 OBJS        = $(SRCS:srcs/%.cpp=$(OBJDIR)/%.o)

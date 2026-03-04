@@ -21,83 +21,23 @@ il faut sortir du terminal
 // ca met le message de base : "Client FD 6 nickname set to: alice"
 
 
-A Faire apres Channel :
-	cree getChannel() dans server.hpp/cpp
+## 🎯 Structure ExecJoin
 
+Voici l'ordre logique que tu devrais avoir :
+```
+1. Client enregistré ? → return
+2. Paramètres valides ? → errMoreParams
+3. Nom valide ? → errNoSuchChannel
+4. Client déjà membre ? → return (silencieux)
 
+5. Si channel existe déjà (pas nouveau) :
+   a. Mode +i actif ? → vérifier si invité, sinon errInviteOnlyChan
+   b. Mode +k actif ? → vérifier password, sinon errBadChannelKey
+   c. Mode +l actif ? → vérifier limite, sinon errChannelIsFull
 
-    if (target[0] == '#')
-    {
-        // C'est un CHANNEL
-        // TODO: Attendre la classe Channel
-        // Channel *channel = server->getChannel(target);
-        // if (!channel)
-        // {
-        //     IRC::errNoSuchNick(client, target);
-        //     return;
-        // }
-        // 
-        // if (!channel->hasMember(client))
-        // {
-        //     IRC::errCannotSendToChan(client, target);
-        //     return;
-        // }
-        // 
-        // channel->broadcast(fullMsg, client);  // broadcast sauf à l'émetteur
-        
-        std::cout << "  PRIVMSG to channel not implemented yet" << std::endl;
-    }
-    else
-    {
-        // C'est un CLIENT
-        Client *recipient = server->getClientByNickname(target);
-        
-        if (!recipient)
-        {
-            IRC::errNoSuchNick(client, target);
-            return;
-        }
-        
-        // Envoyer le message au destinataire
-        send(recipient->getFd(), fullMsg.c_str(), fullMsg.size(), 0);
-        
-        std::cout << "📨 PRIVMSG from " << client->getNickname() 
-                  << " to " << recipient->getNickname() 
-                  << ": " << message << std::endl;
-    }
-}
+6. Ajouter le membre au channel
+7. Si nouveau channel → ajouter comme opérateur
+8. Broadcaster le JOIN
+9. Envoyer le topic
+10. Envoyer la liste des membres
 
-
-// 2. Récupérer ou créer le channel
-bool isNewChannel = (server->getChannel(channelName) == NULL);
-Channel *channel = server->getOrCreateChannel(channelName);
-
-// 3. Ajouter le client au channel
-channel->addMember(client);
-
-// Si c'est un nouveau channel, le client devient opérateur
-if (isNewChannel)
-    channel->addOperator(client);
-
-
-
-    if (target[0] == '#')
-{
-    // Vérifier que le channel existe
-    Channel *channel = server->getChannel(target);
-    if (!channel)
-    {
-        IRC::errNoSuchNick(client, target);
-        return;
-    }
-    
-    // Vérifier que le client est membre
-    if (!channel->isMember(client->getNickname()))
-    {
-        IRC::errCannotSendToChan(client, target);
-        return;
-    }
-    
-    // Broadcaster à tous SAUF l'émetteur
-    channel->broadcast(fullMsg, client);
-}

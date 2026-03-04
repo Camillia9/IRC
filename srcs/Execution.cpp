@@ -71,36 +71,36 @@ void execJoin(Client *client, const t_command &cmd, Server *server)
 {
 	if (!client->isRegistered())
 		return;
-	else if (cmd.params.empty()) {
+	if (cmd.params.empty()) {
 		IRC::errMoreParams(client, cmd);
 		return;
 	}
 
 	std::string channelName = cmd.params[0];
-
-	if (channelName[0] != '#') {
-		IRC::errNoSuchChannel(client, channelName);
-		return;
-	}
 	if (!isValidChannelName(channelName)) {
 		IRC::errNoSuchChannel(client, channelName);
 		return;
 	}
 	// 2. Verifier si le channel existe, si non il se cree automatiquement :
-	bool isNewChannel = (server->getChannel(channelName) == NULL);
-	Channel *channel = server->getOrCreateChannel(); // Fcntion manquqnte
+	bool isNewChannel = !server->doesChannelExist(channelName);
+	Channel *channel = server->getOrCreateChannel(channelName);
 
 	// 3. Ajouter le client au channel
-	channel->addMember(client);
+	if (channel->isMember(client->getNickname()))
+		return;
+	else
+	// AJOUTER LES MODES PLUS TARD : 
+//1. Vérifier si déjà membre → return si oui
+//2. Si PAS nouveau channel → vérifier les modes +i, +k, +l
+//3. Si tout OK → addMember()
+//4. Si nouveau channel → addOperator()
+		channel->addMember(client);
 
 	if (isNewChannel)
 		channel->addOperator(client);
 	// 4. Notifier les autres membres du channel et lui-meme
-		// ":nick!user@host JOIN #channel"
-	std::string nick = client->getNickname();
-	std::string user = client->getUsername();
-	std::string JOINmsg = ":" + nick + "!" + user + "@host JOIN " + channelName + "\r\n";
-	channel->broadcast(JOINmsg); // Faire une fction broadcast avec juste une string en parametre et tout le monde recoit le message (y compris lui meme)
+	std::string JOINmsg = ":" + client->getNickname() + "!" + client->getUsername() + "@localhost JOIN " + channelName + "\r\n";
+	channel->broadcast(JOINmsg);
 
 	// 5. Envoyer le topic s'il existe (code 332/331)
 	if (channel->getTopic().empty())
@@ -111,7 +111,7 @@ void execJoin(Client *client, const t_command &cmd, Server *server)
 	// 6. Envoyer la liste des membres (le premier avec un '@') rpl 353,
 		// Puis envoyer Le EOF rpl 366
 
-	std::string names = channel->getMembersList(); //PB car getMembers renvoie une map
+	std::string names = channel->getMembersList();
 	IRC::rplNameReply(client, channelName, names);
 	IRC::rplEndOfNames(client, channelName);
 }
@@ -157,11 +157,10 @@ void execPart(Client *client, const t_command &cmd, Server *server)
 
 	// 3. Retirer le client du channel
 	channel->removeMember(client);
-	// retirer aussi le channel dans le clients ?
 
 	// 4. Si vide, supprimer le channesls
 	if (channel->isEmpty())
-		server->deleteChannel(channelName);
+		server->deleteChannelIfEmpty(channelName);
 	
 }
 

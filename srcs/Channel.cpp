@@ -6,6 +6,8 @@ Channel::Channel(const std::string& name)
     _topic = "";
 }
 
+Channel::~Channel() {}
+
 const std::string& Channel::getName() const
 {
     return _name;

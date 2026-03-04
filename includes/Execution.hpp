@@ -27,6 +27,6 @@ void execJoin(Client *client, const t_command &cmd, Server *server);
 void execPart(Client *client, const t_command &cmd, Server *server);
 
 // Messages
-void execPrivmsg(Client *client, const t_command &cmd, Server *server);
+void execPrvMsg(Client *client, const t_command &cmd, Server *server);
 
 #endif

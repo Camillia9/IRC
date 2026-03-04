@@ -41,23 +41,22 @@ private:
 	void removeClient(int fd);      // Client déconnecté
 	void addClient(int fd);			// Ajouter un client à la liste
 	Client*  getClientByFd(int fd); // Retrouver un client par son FD
-	Client*	getClientByNick(const std::string &nick); // Retrouver un client par son nick
+	//Client*	getClientByNick(const std::string &nick); // Retrouver un client par son nick
 
 	std::map<std::string, Channel*> _channels; // ts les channels
 
 
 
 	//gest° channel
-	bool doesChannelExist(const std::string& channelName) const;
 	bool isValidChannelName(const std::string& channelName) const;
-
-
-
-
-
-
-
-public:
+	
+	
+	
+	
+	
+	
+	
+	public:
 	Server(int port, const std::string &password);	// Constructeur
 	~Server();										// Destructeur
 	
@@ -67,12 +66,14 @@ public:
 	const std::vector<Client*>& getClients()const;
 	
 	Client*	getClientByNick(const std::string &nick); // Retrouver un client par son nick
-	void executeCommand(Client &client, const t_command &cmd);
-
+	void executeCommand(Client &client, const t_command &cmd, Server *server);
+	
 	Channel*	findChannel(const std::string& channelName);
     Channel*	createChannel(const std::string& channelName);
     Channel*	getOrCreateChannel(const std::string& channelName);
+	Channel* 	getChannel(const std::string &name);
     void	deleteChannelIfEmpty(const std::string& channelName);
+	bool doesChannelExist(const std::string& channelName);
 };
 
 
