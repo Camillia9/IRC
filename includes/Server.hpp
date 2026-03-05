@@ -74,6 +74,8 @@ private:
 	Channel* 	getChannel(const std::string &name);
     void	deleteChannelIfEmpty(const std::string& channelName);
 	bool doesChannelExist(const std::string& channelName);
+
+	void handleClientLeavingChannel(Client *client, Channel *channel, const std::string &channelName);
 };
 
 

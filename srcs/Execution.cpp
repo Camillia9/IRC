@@ -1,23 +1,5 @@
 #include "Execution.hpp"
 
-
-
-// void	executeCommand(Server &server, Client &client, const t_command &cmd)
-// {
-// 	static std::map<std::string, CommandHandler> listeCommandes;
-
-// 	if (listeCommandes)
-// 	{
-
-// 	}
-
-// }
-
-
-
-
-
-
 void execPass(Client *client, const t_command &cmd, const std::string &serverPasswd)
 {
 	if (client->isAuthenticated())
@@ -155,12 +137,7 @@ void execPart(Client *client, const t_command &cmd, Server *server)
 	// Brodcaster le PART a tout les membres (y compris celui qui part)
 	channel->broadcast(PartMsg);
 
-	// 3. Retirer le client du channel
-	channel->removeMember(client);
-
-	// 4. Si vide, supprimer le channesls
-	if (channel->isEmpty())
-		server->deleteChannelIfEmpty(channelName);
+	server->handleClientLeavingChannel(client, channel, channelName);
 	
 }
 

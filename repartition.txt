@@ -41,3 +41,37 @@ Voici l'ordre logique que tu devrais avoir :
 9. Envoyer le topic
 10. Envoyer la liste des membres
 
+
+	while (g_running) {
+		int pollEvents = poll(_pollFds.data(), _pollFds.size(), -1); // Attendre un event sur nimporte quel socket
+
+		if (pollEvents < 0) {
+			std::cerr << "poll() error" << std::endl;
+			break;
+		}
+		//for (size_t i = 0; i < _pollFds.size(); i++) { // Parcourir tout les fd
+		//	if (_pollFds[i].revents == 0) // Rien a faire
+		//		continue;
+
+		//	bool clientRemoved = false;
+
+		//	if (_pollFds[i].revents & POLLIN) { // Donnes a lire ?
+		//		if (_pollFds[i].fd == _serverSocket) // C'est le serveur donc nouvelle connexion
+		//			acceptNewClient();
+		//		else {
+		//			size_t oldSize = _pollFds.size();
+		//			handleClientData(_pollFds[i].fd); // c'est un client donc donnee recu
+
+		//			if (_pollFds.size() < oldSize) {
+		//				clientRemoved = true;
+		//				i--;
+		//			}
+		//		}
+		//	}
+		//	if (!clientRemoved && _pollFds[i].revents & (POLLERR | POLLHUP)) { // Client deconnecte ?
+		//		std::cout << "Client Disconnected (POLLERR/POLLHUP)" << std::endl;
+		//		removeClient(_pollFds[i].fd);
+		//		i--;
+		//	}
+		//}
+   }
