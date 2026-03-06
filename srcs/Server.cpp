@@ -202,14 +202,20 @@ void	Server::executeCommand(Client &client, const t_command &cmd, Server *server
 	else if (name == "USER")
 		execUser(&client, cmd);
 
-	 else if (name == "JOIN")
+	else if (name == "JOIN")
 	 	execJoin(&client, cmd, server);
 
-	 else if (name == "PART")
+	else if (name == "PART")
 	 	execPart(&client, cmd, server);
 	
 	else if (name == "PRIVMSG")
 		execPrvMsg(&client, cmd, server);
+
+	else if (name == "TOPIC")
+		execTopic(&client, cmd, server);
+
+	else if (name == "MODE")
+		execModes(&client, cmd, server);
 
 	else
 		std::cout << "Unknown command : " << name << std::endl;;

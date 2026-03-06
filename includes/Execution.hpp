@@ -29,4 +29,8 @@ void execPart(Client *client, const t_command &cmd, Server *server);
 // Messages
 void execPrvMsg(Client *client, const t_command &cmd, Server *server);
 
+//Topic / Modes
+void execTopic(Client *client, const t_command &cmd, Server *server);
+void execModes(Client *client, const t_command &cmd, Server *server);
+
 #endif

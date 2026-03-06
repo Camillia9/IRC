@@ -186,3 +186,74 @@ void execPrvMsg(Client *client, const t_command &cmd, Server *server)
 		send(recipient->getFd(), fullMsg.c_str(), fullMsg.size(), 0);
 	}
 }
+
+void execTopic(Client *client, const t_command &cmd, Server *server)
+{
+	if (!client->isRegistered())
+		return;
+	if (cmd.params.empty()) {
+		IRC::errMoreParams(client, cmd);
+		return;
+	}
+	std::string channelName = cmd.params[0];
+	Channel *channel = server->getChannel(channelName);
+	if (!channel) {
+		IRC::errNoSuchChannel(client, channelName);
+		return;
+	}
+	if (!channel->isMember(client->getNickname())) {
+		IRC::errNotOnChannel(client, channelName);
+		return;
+	}
+	// Affichage du Topic
+	if (cmd.params.size() == 1) {
+		if (channel->getTopic().empty())
+			IRC::rplNoTopic(client, channelName);
+		else
+			IRC::rplTopic(client, channelName, channel->getTopic());
+		return;
+	}
+	// Changement du Topic
+	if (cmd.params.size() > 1) {
+		if (channel->isTopicRestricted() && !channel->isOperator(client->getNickname())) {
+				IRC::errOpNeededToChanges(client, channelName);
+				return;
+		}
+		//recupere le nouveau topic et oon le broadcaste (a tout le monde et lui-meme)
+		channel->setTopic(cmd.params[1]);
+		std::string Msg = ":" + client->getNickname() + "!" + client->getUsername() + "@localhost TOPIC " + channelName + " :" + cmd.params[1] + "\r\n";
+		channel->broadcast(Msg); 
+	}
+}
+
+void execModes(Client *client, const t_command &cmd, Server *server)
+{
+	if (!client->isRegistered())
+		return;
+	if (cmd.params.empty()) {
+		IRC::errMoreParams(client, cmd);
+		return;
+	}
+
+	std::string channelName = cmd.params[0];
+	Channel *channel = server->getChannel(channelName);
+
+	if (!channel) {
+		IRC::errNoSuchChannel(client, channelName);
+		return;
+	}
+	if (!channel->isMember(client->getNickname())) {
+		IRC::errNotOnChannel(client, channelName);
+		return;
+	}
+	if (cmd.params.size() == 1) {
+		std::string modes = channel->getModesString();
+		IRC::rplChannelMode(client, channelName, modes);
+		return;
+	}
+	if (!channel->isOperator(client->getNickname())) {
+		IRC::errOpNeededToChanges(client, channelName);
+		return;
+	}
+	// Parser + Appliquer modes
+}

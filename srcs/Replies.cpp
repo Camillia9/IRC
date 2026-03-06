@@ -168,3 +168,21 @@ void IRC::errNoRecipient(Client *client, const t_command &command)
 	std::string rep = oss.str();
 	send(client->getFd(), rep.c_str(), rep.size(), 0);
  }
+
+ void IRC::errOpNeededToChanges(Client *client, const std::string &channel)
+ {
+	std::ostringstream oss;
+	oss << ":ircserv 482 " << client->getNickname() << " " << channel << " :You're not channel operator\r\n";
+
+	std::string rep = oss.str();
+	send(client->getFd(), rep.c_str(), rep.size(), 0);
+ }
+
+ void IRC::rplChannelMode(Client *client, const std::string &channel, const std::string &modes)
+ {
+	std::ostringstream oss;
+	oss << ":ircserv 324 " << client->getNickname() << " " << channel << " " << modes << "\r\n";
+
+	std::string rep = oss.str();
+	send(client->getFd(), rep.c_str(), rep.size(), 0);
+ }

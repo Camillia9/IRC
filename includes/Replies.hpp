@@ -37,7 +37,9 @@ namespace IRC {
 	void errNoSuchNick(Client *client, const std::string &target);
 	void errCannotSendToChan(Client *client, const std::string &channel);
 
-	// void executeCommand(Server &server, Client &client, const t_command &cmd);
+	// MODES
+	void errOpNeededToChanges(Client *client, const std::string &channel);
+	void rplChannelMode(Client *client, const std::string &channel, const std::string &modes);
 };	
 
 #endif

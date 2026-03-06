@@ -4,6 +4,10 @@ Channel::Channel(const std::string& name)
 {
     _name = name;
     _topic = "";
+	_topicRestricted = false;
+	_inviteOnly = false;
+	_key = "";
+	_userLimit = 0;
 }
 
 Channel::~Channel() {}
@@ -35,9 +39,60 @@ const std::map<std::string, Client*>& Channel::getMembers() const //pour cam i t
 }
 
 
+bool Channel::isInviteOnly()const
+{
+	return _inviteOnly;
+}
 
+bool Channel::isTopicRestricted()const
+{
+	return _topicRestricted;
+}
 
+bool Channel::isInvited(const std::string &nick)const
+{
+	return _invitedUsers.find(nick) != _invitedUsers.end();
+}
 
+std::string Channel::getKey()const
+{
+	return _key;
+}
+
+int Channel::getUserLimit()const 
+{
+	return _userLimit;
+}
+
+void Channel::setTopicRestricted(bool value)
+{
+	_topicRestricted = value;
+}
+
+void Channel::setInviteOnly(bool value)
+{
+	_inviteOnly = value;
+}
+
+void Channel::setKey(const std::string &key)
+{
+	_key = key;
+}
+
+void Channel::setUserLimit(int limit)
+{
+	_userLimit = limit;
+}
+
+void Channel::addInvited(const std::string &nick)
+{
+	_invitedUsers.insert(nick);
+}
+
+void Channel::removeInvited(const std::string &nick)
+{
+	_invitedUsers.erase(nick);
+}
 
 
 
@@ -127,7 +182,7 @@ void	Channel:: addOperator(Client* client)
 	if (_operators.find(nickname) != _operators.end()) //verif si ps déjà opé qd même
 	//if (isOperator(nickname))
 	{
-		std::cerr << "Error: " << nickname << " is already an ope of " << _name << std::endl;
+		//std::cerr << "Error: " << nickname << " is already an ope of " << _name << std::endl;
         return;
 	}
 
@@ -151,67 +206,6 @@ void	Channel::removeOperator(Client* client)
 
 	std::cout << nickname << " is no longer operator of " << _name << std::endl;
 }
-
-
-
-
-// void execJoin(Client *client, const t_command &cmd, Server *server)
-// {
-//     if (!client->isRegistered())
-//         return;
-//     else if (cmd.params.empty()) {
-//         IRC::errMoreParams(client, cmd);
-//         return;
-//     }
-
-//     std::string channelName = cmd.params[0];
-
-//     if (channelName[0] != '#') {
-//         IRC::errNoSuchChannel(client, channelName);
-//         return;
-//     }
-//     if (!isValidChannelName(channelName)) {
-//         IRC::errNoSuchChannel(client, channelName);
-//         return;
-//     }
-    // 2. Verifier si le channel existe, si non il se cree automatiquement :
-//     bool isNewChannel = (server->getChannel(channelName) == NULL);
-//     Channel *channel = server->getOrCreateChannel(); // Fcntion manquqnte
-
-    // 3. Ajouter le client au channel
-//     channel->addMember(client);
-
-//     if (isNewChannel)
-//         channel->addOperator(client);
-    // 4. Notifier les autres membres du channel et lui-meme
-        // ":nick!user@host JOIN #channel"
-//     std::string nick = client->getNickname();
-//     std::string user = client->getUsername();
-//     std::string JOINmsg = ":" + nick + "!" + user + "@host JOIN " + channelName + "\r\n";
-//     channel->broadcast(JOINmsg); // Faire une fction broadcast avec juste une string en parametre et tout le monde recoit le message (y compris lui meme)
-
-    // 5. Envoyer le topic s'il existe (code 332/331)
-//     if (channel->getTopic().empty())
-//         IRC::rplNoTopic(client, channelName);
-//     else
-//         IRC::rplTopic(client, channelName, channel->getTopic());
-
-    // 6. Envoyer la liste des membres (le premier avec un '@') rpl 353,
-        // Puis envoyer Le EOF rpl 366
-
-//     std::string names = channel->getMembers(); //PB car getMembers renvoie une map
-//     IRC::rplNameReply(client, channelName, names);
-//     IRC::rplEndOfNames(client, channelName);
-// }
-
-
-
-
-
-
-
-
-
 
 //si ds mon channel y'a moi camillia et lewis bah cette fonc° doit send mon mess "citron" à camillia et lewis MAIS sans me l'envoyer à moi même (logique)
 //utilisa° de std::map pour parcourir les diff clients
