@@ -63,34 +63,47 @@ void execJoin(Client *client, const t_command &cmd, Server *server)
 		IRC::errNoSuchChannel(client, channelName);
 		return;
 	}
-	// 2. Verifier si le channel existe, si non il se cree automatiquement :
+	// 1. Verifier si le channel existe, si non il se cree automatiquement :
 	bool isNewChannel = !server->doesChannelExist(channelName);
 	Channel *channel = server->getOrCreateChannel(channelName);
 
-	// 3. Ajouter le client au channel
+	// 2. Ajouter le client au channel
 	if (channel->isMember(client->getNickname()))
 		return;
-	else
-	// AJOUTER LES MODES PLUS TARD : 
-//1. Vérifier si déjà membre → return si oui
-//2. Si PAS nouveau channel → vérifier les modes +i, +k, +l
-//3. Si tout OK → addMember()
-//4. Si nouveau channel → addOperator()
-		channel->addMember(client);
+	//3. Si PAS nouveau channel → vérifier les modes +i, +k, +l
+	if (!isNewChannel) {
+		if (channel->isInviteOnly() && !channel->isInvited(client->getNickname())) {
+			IRC::errInviteOnlyChan(client, channelName);
+			return;
+		}
+		if (!channel->getKey().empty()) {
+			if (cmd.params.size() < 2 || cmd.params[1] != channel->getKey()) {
+				IRC::errBadChannelKey(client, channelName);
+				return;
+			}
+		}
+		if (channel->getUserLimit() > 0 && channel->getMembers().size() >= size_t(channel->getUserLimit())) {
+			IRC::errChannelIsFull(client, channelName);
+			return;
+		}
+	}
+	//4. Si tout OK → addMember()
+	channel->addMember(client);
 
+	//5. Si nouveau channel → addOperator()
 	if (isNewChannel)
 		channel->addOperator(client);
-	// 4. Notifier les autres membres du channel et lui-meme
+	// 6. Notifier les autres membres du channel et lui-meme
 	std::string JOINmsg = ":" + client->getNickname() + "!" + client->getUsername() + "@localhost JOIN " + channelName + "\r\n";
 	channel->broadcast(JOINmsg);
 
-	// 5. Envoyer le topic s'il existe (code 332/331)
+	// 7. Envoyer le topic s'il existe (code 332/331)
 	if (channel->getTopic().empty())
 		IRC::rplNoTopic(client, channelName);
 	else
 		IRC::rplTopic(client, channelName, channel->getTopic());
 
-	// 6. Envoyer la liste des membres (le premier avec un '@') rpl 353,
+	// 8. Envoyer la liste des membres (le premier avec un '@') rpl 353,
 		// Puis envoyer Le EOF rpl 366
 
 	std::string names = channel->getMembersList();
@@ -256,4 +269,66 @@ void execModes(Client *client, const t_command &cmd, Server *server)
 		return;
 	}
 	// Parser + Appliquer modes
+	std::string ModesList = cmd.params[1];
+	bool addModes = true;
+	size_t paramsIdx = 2;
+
+	for (size_t i = 0; i < ModesList.size(); i++) {
+		char c = ModesList[i];
+		if (c == '+') {
+			addModes = true;
+			continue; // Passe au caracteres suivant
+		} else if (c == '-') {
+			addModes = false;
+			continue; // Passe au caracteres suivant
+		}
+		if (c == 'i') {
+			channel->setInviteOnly(addModes);
+		}
+		else if (c == 't') {
+			channel->setTopicRestricted(addModes);
+		}
+		else if (c == 'k') {
+			if (addModes) {
+				if (paramsIdx >= cmd.params.size())
+					continue;
+				channel->setKey(cmd.params[paramsIdx]);
+				paramsIdx++;
+			}
+			else 
+				channel->setKey("");
+		}
+		else if (c == 'o') {
+			if (paramsIdx >= cmd.params.size()) // Verifie si index existant
+					continue;
+			std::string targetNick = cmd.params[paramsIdx]; // Puis on y accede
+			paramsIdx++; // On incremente ici au cas ou s'il y a un probleme, le mode d'apres soit quand meme sur son bon parametres
+
+			Client *target = server->getClientByNick(targetNick);
+			if (!target || !channel->isMember(targetNick)) {
+				std::cerr << "Error: " << targetNick << " is not on channel\r\n";
+				continue;
+			}
+			if (addModes)
+				channel->addOperator(target);
+			else
+				channel->removeOperator(target);
+		}
+		else if (c == 'l') {
+			if (addModes) {
+				if (paramsIdx >= cmd.params.size())
+                	continue;
+
+				int limit = atoi(cmd.params[paramsIdx].c_str());
+				channel->setUserLimit(limit);
+				paramsIdx++;
+			}
+		 	else
+				channel->setUserLimit(0);
+		}
+	}
+	std::string modeMsg = ":" + client->getNickname() + "!" + 
+                      client->getUsername() + "@localhost MODE " + 
+                      channelName + " " + ModesList + "\r\n";
+	channel->broadcast(modeMsg);
 }

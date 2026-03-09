@@ -40,6 +40,9 @@ namespace IRC {
 	// MODES
 	void errOpNeededToChanges(Client *client, const std::string &channel);
 	void rplChannelMode(Client *client, const std::string &channel, const std::string &modes);
+	void errChannelIsFull(Client *client, const std::string &channel);
+	void errInviteOnlyChan(Client *client, const std::string &channel);
+	void errBadChannelKey(Client *client, const std::string &channel);
 };	
 
 #endif
