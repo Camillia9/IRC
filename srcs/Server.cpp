@@ -316,3 +316,4 @@ void Server::deleteChannelIfEmpty(const std::string& channelName)
 	delete channel;
 	_channels.erase(channelName);
 }
+
