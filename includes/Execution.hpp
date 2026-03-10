@@ -33,4 +33,7 @@ void execPrvMsg(Client *client, const t_command &cmd, Server *server);
 void execTopic(Client *client, const t_command &cmd, Server *server);
 void execModes(Client *client, const t_command &cmd, Server *server);
 
+// Bonus
+void execNames(Client *client, const t_command &cmd, Server *server);
+
 #endif

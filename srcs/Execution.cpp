@@ -332,3 +332,25 @@ void execModes(Client *client, const t_command &cmd, Server *server)
                       channelName + " " + ModesList + "\r\n";
 	channel->broadcast(modeMsg);
 }
+
+void execNames(Client *client, const t_command &cmd, Server *server)
+{
+	if (!client->isRegistered())
+		return;
+	if (cmd.params.empty()) {
+		IRC::errMoreParams(client, cmd);
+		return;
+	}
+
+	std::string channelName = cmd.params[0];
+	Channel *channel = server->getChannel(channelName);
+
+	if (!channel) {
+		IRC::errNoSuchChannel(client, channelName);
+		return;
+	}
+	
+	std::string names = channel->getMembersList();
+	IRC::rplNameReply(client, channelName, names);
+	IRC::rplEndOfNames(client, channelName);
+}

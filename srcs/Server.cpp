@@ -217,6 +217,9 @@ void	Server::executeCommand(Client &client, const t_command &cmd, Server *server
 	else if (name == "MODE")
 		execModes(&client, cmd, server);
 
+	else if (name == "NAMES")
+		execNames(&client, cmd, server);
+
 	else
 		std::cout << "Unknown command : " << name << std::endl;;
 }
