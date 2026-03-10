@@ -13,6 +13,11 @@ Server::~Server()
 		close(_clients[i]->getFd());
 		delete _clients[i];
 	}
+
+	std::map<std::string, Channel*>::iterator it;
+	for (it = _channels.begin(); it != _channels.end(); ++it)
+		delete it->second;
+
 	if (_serverSocket != -1)
 		close(_serverSocket);
 }
@@ -92,19 +97,61 @@ void Server::addClient(int fd)
 
 void Server::removeClient(int fd)
 {
+	// 1. Trouver le client
+	Client *client = getClientByFd(fd);
+	if (!client)
+		return; // Client deja supp ou introuvables
+
+	std::cout << "REMOVING client: " << client->getNickname() 
+       << " (FD " << fd << ")" << std::endl;
+	
+	// 2. Le retirer de tous ses channels
+	std::vector<std::string> channelsToDelete; // vector pour push tout les channels a supprimer (pour eviter de supprimer directment en parcourant les channels et que l'it devient invalide)
+	std::vector<std::string>channelsToHandle; // Pareil pour la gestion des operators
+	std::map<std::string, Channel*>::iterator it;
+
+	for (it = _channels.begin(); it != _channels.end(); ++it) {
+		std::string channelName = it->first;
+		Channel *channel = it->second;
+		std::cout << "   Checking channel: " << it->first << std::endl;
+
+		if (it->second->isMember(client->getNickname())) {
+			channelsToHandle.push_back(it->first);
+		}
+		
+		if (channel->isEmpty()) {
+			std::cout << "   Client is member, removing..." << std::endl;
+			channelsToDelete.push_back(channelName);
+		}
+	}
+	std::cout << " Client deleted" << std::endl;
+	for (size_t i = 0; i < channelsToDelete.size(); i++)
+		this->deleteChannelIfEmpty(channelsToDelete[i]);
+	
+	for (size_t i = 0; i < channelsToHandle.size(); i++) {
+		Channel *channel = getChannel(channelsToHandle[i]);
+		if (channel)
+			handleClientLeavingChannel(client, channel, channelsToHandle[i]);
+	}
+
+	// 3. Le retirer de _clients
 	for (size_t i = 0; i < _clients.size(); i++) {
-		if (_clients[i]->getFd() == fd) {
-			delete _clients[i]; // delete car allocation de memoire avec new, du coup pointeur = NULL
+		if (_clients[i] == client) {
 			_clients.erase(_clients.begin() + i); // Erase Supprime l'element i (le pointeur a NUL)
+			delete client; // delete car allocation de memoire avec new, du coup pointeur = NULL
 			break;
 		}
 	}
+
+	// 4. Le retirer de _pollFds
 	for (size_t i = 0; i < _pollFds.size(); i++) {
 		if (_pollFds[i].fd == fd) {
 			_pollFds.erase(_pollFds.begin() + i); //PollFds est une structure simple, pas d'allocation de memoire
 			break;
 		}
 	}
+
+	// 5. Fermer la socket
 	std::cout << "Clients fd " << fd << " removed" << std::endl;
 	close(fd);
 }
@@ -128,12 +175,17 @@ Client *Server::getClientByFd(int fd)
 		return NULL;
 }
 
-//Client *Server::getClientByNick(const std::string &nick)
-//{
+Client *Server::getClientByNick(const std::string &nick)
+{
+	for (size_t i = 0; i < _clients.size(); i++)
+	{
+		if (_clients[i]->getNickname() == nick)
+			return _clients[i];
+	}
+	return NULL;
+}
 
-//}
-
-void	Server::executeCommand(Client &client, const t_command &cmd)
+void	Server::executeCommand(Client &client, const t_command &cmd, Server *server)
 {
 
 	const std::string &name = cmd.command;
@@ -150,11 +202,23 @@ void	Server::executeCommand(Client &client, const t_command &cmd)
 	else if (name == "USER")
 		execUser(&client, cmd);
 
-	// else if (name == "JOIN")
-	// 	execJoin(&client, cmd, &server);
+	else if (name == "JOIN")
+	 	execJoin(&client, cmd, server);
 
-	// else if (name == "PART")
-	// 	execPart(&client, cmd, &server);
+	else if (name == "PART")
+	 	execPart(&client, cmd, server);
+	
+	else if (name == "PRIVMSG")
+		execPrvMsg(&client, cmd, server);
+
+	else if (name == "TOPIC")
+		execTopic(&client, cmd, server);
+
+	else if (name == "MODE")
+		execModes(&client, cmd, server);
+
+	else if (name == "NAMES")
+		execNames(&client, cmd, server);
 
 	else
 		std::cout << "Unknown command : " << name << std::endl;;
@@ -163,6 +227,7 @@ void	Server::executeCommand(Client &client, const t_command &cmd)
 void Server::handleClientData(int fd)
 {
 	Client *client = getClientByFd(fd);
+
 	if (!client) 
 	{
 		std::cerr << "Client not found" << std::endl;
@@ -187,25 +252,30 @@ void Server::handleClientData(int fd)
 
 			// cmd.brut = line;
 
-			executeCommand(*client, cmd);
+			executeCommand(*client, cmd, this);
         }
 	}
-
-	else 
-	{
-		removeClient(fd);
-	}
-
+	else
+	    removeClient(fd);
 }
 
-	//	for (size_t j = 0; j < msg.size(); ++j)
-	//	{
-	//	    std::cout << "💬 Client FD " << fd << " sent: " << msg[j] << std::endl;
-		
-	//	    t_command cmd = parseMessage(msg[j]);
-	//	    executeCommand(client, cmd);
-	//	}
+void Server::handleClientLeavingChannel(Client *client, Channel *channel, const std::string &channelName)
+{
+	bool wasOperator = channel->isOperator(client->getNickname());
 
+	channel->removeMember(client);
+	
+	if (wasOperator && !channel->isEmpty()) {
+		const std::map<std::string, Client*> &Member = channel->getMembers();
+		std::map<std::string, Client*>::const_iterator it = Member.begin();
+		if (it != Member.end()) {
+			Client *newOp = it->second;
+			channel->addOperator(newOp);
+		}
+	}
+	if (channel->isEmpty())
+		deleteChannelIfEmpty(channelName);
+}
 
 
 void Server::run()
@@ -216,36 +286,49 @@ void Server::run()
 	initPoll();
 
 	std::cout << "Server running... Press Ctrl+C to stop" << std::endl;
-	while (g_running) {
+	while (g_running)
+	{
 		int pollEvents = poll(_pollFds.data(), _pollFds.size(), -1); // Attendre un event sur nimporte quel socket
-
+		
 		if (pollEvents < 0) {
 			std::cerr << "poll() error" << std::endl;
 			break;
 		}
-		for (size_t i = 0; i < _pollFds.size(); i++) { // Parcourir tout les fd
-			if (_pollFds[i].revents == 0) // Rien a faire
-				continue;
-
-			if (_pollFds[i].revents & POLLIN) { // Donnes a lire ?
-				if (_pollFds[i].fd == _serverSocket) // C'est le serveur donc nouvelle connexion
-					acceptNewClient();
-				else
-					handleClientData(_pollFds[i].fd); // c'est un client donc donnee recu
-			}
-			if (_pollFds[i].revents & (POLLERR | POLLHUP)) { // Client deconnecte ?
-				std::cout << "Client Disconnected" << std::endl;
-				removeClient(_pollFds[i].fd);
-				i--;
-			}
+		for (size_t i = 0; i < _pollFds.size(); i++)
+		{
+		    if (_pollFds[i].revents == 0)
+		        continue;
+		
+		    bool clientRemoved = false;
+		
+		    if (_pollFds[i].revents & POLLIN)
+		    {
+		        if (_pollFds[i].fd == _serverSocket)
+		            acceptNewClient();
+		        else
+		        {
+		            size_t oldSize = _pollFds.size();
+		            handleClientData(_pollFds[i].fd);
+				
+		            if (_pollFds.size() < oldSize)
+		            {
+		                clientRemoved = true;
+		                i--;
+		            }
+		        }
+		    }		
+		    if (!clientRemoved && (_pollFds[i].revents & (POLLERR | POLLHUP)))
+		    {
+		        removeClient(_pollFds[i].fd);
+		        i--;
+		    }
 		}
 	}
-	
 }
 
 
 
-bool Server::doesChannelExist(const std::string& channelName) const
+bool Server::doesChannelExist(const std::string& channelName)
 {
 	return (_channels.find(channelName) != _channels.end());
 }
@@ -300,6 +383,14 @@ Channel*	Server::getOrCreateChannel(const std::string& channelName)
         return (channel);
 
 	return (createChannel(channelName));
+}
+
+Channel* Server::getChannel(const std::string &name)
+{
+    std::map<std::string, Channel*>::iterator it = _channels.find(name);
+    if (it != _channels.end())
+        return it->second;
+    return NULL;
 }
 
 void Server::deleteChannelIfEmpty(const std::string& channelName)
