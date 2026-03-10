@@ -52,3 +52,10 @@ POLLERR   // Erreur sur la socket
 POLLNVAL  // FD invalide
 
 
+
+# Le BOT
+
+# connect()
+--> On cree une socketstandart IPv4 protocole tcp. 
+--> On prepare l'adresse du server, mais au lieu d'ecouter partout (comme pour le server) on ecoute seuleemnt l'adresse specifique du server (localhost : innet_addr = 127.0.0.1)
+--> On se connect au server (nouveau) avec connect()
