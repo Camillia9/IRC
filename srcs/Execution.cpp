@@ -89,6 +89,7 @@ void execJoin(Client *client, const t_command &cmd, Server *server)
 	}
 	//4. Si tout OK → addMember()
 	channel->addMember(client);
+	channel->removeInvited(client->getNickname());
 
 	//5. Si nouveau channel → addOperator()
 	if (isNewChannel)
@@ -353,4 +354,144 @@ void execNames(Client *client, const t_command &cmd, Server *server)
 	std::string names = channel->getMembersList();
 	IRC::rplNameReply(client, channelName, names);
 	IRC::rplEndOfNames(client, channelName);
+}
+
+
+void	execKick(Client *client, const t_command &cmd, Server *server)
+{
+	if (!client->isRegistered())
+		return;
+
+
+	if (cmd.params.size() < 2) // verif le nb de param -> cf rfc -> Parameters: <channel> <user> [<comment>]
+	{
+		IRC::errMoreParams(client, cmd); // 461
+		return;
+	}
+
+	std::string channelName = cmd.params[0];
+	std::string targetNick  = cmd.params[1];
+
+
+	Channel *channel = server->getChannel(channelName);
+	if (!channel) // Verif que le channel existe bien
+	{
+		IRC::errNoSuchChannel(client, channelName); // 403
+		return;
+	}
+
+
+    if (!channel->isMember(client->getNickname())) // verif que le client qui kick est ds le channel
+	{
+		IRC::errNotOnChannel(client, channelName); // 442
+		return;
+	}
+
+	if (!channel->isOperator(client->getNickname()))
+	{
+		IRC::errOpNeededToChanges(client, channelName); // 482
+		return;
+	}
+
+
+	Client *target = server->getClientByNick(targetNick); //verif que la cible  existe s/ le serveur
+	if (!target)
+	{
+		IRC::errNoSuchNick(client, targetNick); // 401
+		return;
+	}
+
+	if (!channel->isMember(targetNick))
+	{
+		IRC::errUserNotInChannel(client, targetNick, channelName); // 441
+		return;
+	}
+
+
+	// Constru° du message KICK -> cf RFC 1459 -> Parameters: <channel> <user> [<comment>]
+
+	std::string comment;
+    
+	if (cmd.params.size() > 2)
+		comment = cmd.params[2];
+	else
+		comment = client->getNickname();
+
+	std::string kickMsg = ":" + client->getNickname() + "!"
+						+ client->getUsername() + "@localhost KICK "
+						+ channelName + " " + targetNick
+						+ " :" + comment + "\r\n";
+
+
+
+	channel->broadcast(kickMsg); // diffuser le mess à ts les membres du channel
+
+	channel->removeMember(target); // retirer la cible définitivt 
+
+	server->handleClientLeavingChannel(target, channel, channelName);
+}
+
+
+void	execInvite(Client *client, const t_command &cmd, Server *server)
+{
+	if (!client -> isRegistered())
+		return;
+
+	if (cmd.params.size() < 2) // verif nb params -> cf rfc -> Parameters: <nickname> <channel>
+	{
+		IRC::errMoreParams(client, cmd); // 461
+		return;
+	}
+
+	std::string targetNick = cmd.params[0];
+	std::string channelName = cmd.params[1];
+
+
+	Client *target = server->getClientByNick(targetNick); //verif que la cible existe bien
+	if (!target)
+	{
+		IRC::errNoSuchNick(client, targetNick); // 401
+		return;
+	}
+
+
+    Channel *channel = server->getChannel(channelName); // verif que le channel existe
+	if (!channel)
+	{
+		IRC::errNoSuchChannel(client, channelName); // 403
+		return;
+	}
+
+
+	if (!channel->isMember(client->getNickname())) //verif que l'orchestreur est déjà ds le channel
+	{
+		IRC::errNotOnChannel(client, channelName); // 442
+		return;
+	}
+
+
+	if (channel->isMember(targetNick)) // au contR, verif que la cible n'est pas déjà ds le channel
+    {
+		IRC::errUserOnChannel(client, targetNick, channelName); // 443
+		return;
+	}
+
+
+	if (channel->isInviteOnly() && !channel->isOperator(client->getNickname())) // si channel = +i (invite-only), vérif que l'orchestreur = opérateur
+	{
+		IRC::errOpNeededToChanges(client, channelName); // 482
+		return;
+	}
+
+	channel->addInvited(targetNick); // ajout de la cible à la liste des invités
+
+
+	IRC::rplInviting(client, targetNick, channelName); // confirma° à l'orchestreur
+
+
+// notif
+	std::string inviteMsg = ":" + client->getNickname() + "!" + client->getUsername() + "@localhost INVITE " + targetNick + " " + channelName + "\r\n";
+
+	send(target->getFd(), inviteMsg.c_str(), inviteMsg.length(), 0);
+
 }

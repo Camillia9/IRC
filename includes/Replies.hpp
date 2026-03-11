@@ -43,6 +43,14 @@ namespace IRC {
 	void errChannelIsFull(Client *client, const std::string &channel);
 	void errInviteOnlyChan(Client *client, const std::string &channel);
 	void errBadChannelKey(Client *client, const std::string &channel);
+
+	//KICK
+	void errUserNotInChannel(Client *client, const std::string &nick, const std::string &channel);
+
+	// INVITE
+	void rplInviting(Client *client, const std::string &nick, const std::string &channel);
+	void errUserOnChannel(Client *client, const std::string &nick, const std::string &channel);
+
 };	
 
 #endif
