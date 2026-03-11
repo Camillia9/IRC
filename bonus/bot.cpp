@@ -1,6 +1,6 @@
 #include "bot.hpp"
 
-Bot::Bot(const std::string &nickname) : _nick(nickname), _realName("BOT Serv") {}
+Bot::Bot(const std::string &nickname) : _nick(nickname), _realName("BOT Serv"), _recvBuffer("") {}
 
 Bot::~Bot() {}
 
@@ -45,4 +45,60 @@ void Bot::authenticated(const std::string &pass)
 	sendMessage("USER " + _nick + " 0 * :" + _realName + "\r\n");
 
 	std::cout << "OK: Authentication sent!" << std::endl;
+}
+
+std::string Bot::receiveMessage()
+{
+	char buffer[512]; // Taille max d'un message IRC 
+	int bytes_read = recv(_socket, buffer, sizeof(buffer) - 1, 0);
+
+	if (bytes_read <= 0) {
+		std::cerr << "Server disconnected or error" << std::endl;
+		close (_socket);
+		exit(1);
+	}
+
+	buffer[bytes_read] = '\0';
+	_recvBuffer += buffer;
+
+	size_t pos = _recvBuffer.find("\r\n");
+	if (pos == std::string::npos)
+		return "";
+	
+	std::string line = _recvBuffer.substr(0, pos);
+	_recvBuffer.erase(0, pos + 2);
+
+	return line;	
+}
+
+void Bot::joinChannel(const std::string &channel)
+{
+	sendMessage("JOIN " + channel + "\r\n");
+	if (channel.empty())
+		return;
+
+	std::cout << "OK: Bot joined channel " << channel << std::endl;
+}
+
+void Bot::handleMessage(const std::string &line)
+{
+	if (line.find("PRIVMSG")) 
+	{
+		std::istringstream()
+	}
+}
+
+void Bot::run()
+{
+	std::cout << "Bot is running... Press Ctrl+c to stop" << std::endl;
+
+	while (true) 
+	{
+		std::string msg = receiveMessage();
+		if (msg.empty())
+			continue;
+		
+		// DEBUG
+		std::cout << "<< " << msg << std::endl;
+	}
 }

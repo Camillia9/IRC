@@ -1,11 +1,15 @@
 #include "bot.hpp"
 
-int main()
+int main(int ac, char **av)
 {
-	Bot bot("BOTtest");
-	bot.connect("127.0.0.1", 6667, "mdp");
-
-	std::cout << "Ok: Bot connecetd success" << std::endl;
+	if (ac != 5) {
+		std::cerr << "Usage: ./ircbot <host> <port> <password> <nickname>" << std::endl;
+		return 1;
+	}
+	Bot bot(av[4]);
+	bot.connect(av[1], atoi(av[2]), av[3]);
+	bot.joinChannel("#bot");
+	bot.run();
 	
 	return 0;
 }

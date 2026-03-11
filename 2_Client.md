@@ -52,10 +52,60 @@ POLLERR   // Erreur sur la socket
 POLLNVAL  // FD invalide
 
 
+**recv()**
+retourne un nombre positif (le nb d'octects lu)
+ou 0 ou -1 si probleme.
+
+
 
 # Le BOT
+
+La _socket est connecte directement au serveur. Le bot communique seulement avec le server. Tandis que le server communique avec Tout ses clients.
 
 # connect()
 --> On cree une socketstandart IPv4 protocole tcp. 
 --> On prepare l'adresse du server, mais au lieu d'ecouter partout (comme pour le server) on ecoute seuleemnt l'adresse specifique du server (localhost : innet_addr = 127.0.0.1)
 --> On se connect au server (nouveau) avec connect()
+
+# receiveMessage() 
+--> recv(_socket, buffer, sizeof(buffer) - 1, 0)
+    Le bot lit le message du server (_socket)
+    Il retourne un nombre positif (le nb d'octects lu)
+    ou 0 ou -1 si probleme.
+
+--> size_t pos = _recvBuffer.find("\r\n");
+    find retourne la position ou "\r\n" commence.
+    ou npos si pas trouve. (du coup on retourne une string vide attendant la ligne complete au prochain recv())
+
+--> line contient une ligne complete. On recupere tout (sauf \r\n).
+
+---> on efface de _recvbuffer la ligne qu'on vient d'extraire + le \r\n. 
+
+--> On retorune line, une ligne complete. 
+Cette fonction tournera en boucle dans run()
+
+# handleMessage()
+--> On s'interesse ici au messsage (donc PRIVMSG).
+--> istringstream lit une string et la transforme en flux : 
+Si le message recu est :
+:alice!alice@localhost PRIVMSG #bot :hello toi
+
+on fait :
+std::istringstream iss(message);
+std::string id;
+std::string command;
+std::string target;
+
+iss >> is >> command >> target >> (msg)
+
+id = :alice!alice@localhost
+command = PRIVMSG
+target = #bot 
+// msg = ":hello toi"
+
+MAIS Attention. Il faut ennlver les ":" !
+
+--> Extrait le nick de l'id. 
+--> Mettre un message de debug qui affiche ce que bot a recu
+--> Verifier si c'est une commande pour lui "!"
+    --> Si oui, apppeler handleCommand(). 

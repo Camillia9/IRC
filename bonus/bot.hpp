@@ -8,22 +8,27 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <cstdlib>
+#include <sstream>
 
 class Bot {
 private:
 	int			_socket;
 	std::string	_nick;
 	std::string _realName;
+	std::string _recvBuffer;
 
 	void sendMessage(const std::string &msg);
-
-public:
+	void handleMessage(const std::string &line);
+	
+	public:
 	Bot(const std::string &nickname);
 	~Bot();
-
+	
 	void connect(const std::string &host, int port, const std::string &pass);
-	//void sendMessage(const std::string &msg);
 	void authenticated(const std::string &pass);
+	std::string receiveMessage();
+	void joinChannel(const std::string &channel);
+	void run();
 };
 
 #endif
