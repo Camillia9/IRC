@@ -220,6 +220,12 @@ void	Server::executeCommand(Client &client, const t_command &cmd, Server *server
 	else if (name == "NAMES")
 		execNames(&client, cmd, server);
 
+	else if (name == "KICK")
+    	execKick(&client, cmd, server); // maybe changer tous les server par "this"
+
+	else if (name == "INVITE")
+		execInvite(&client, cmd, server);
+
 	else
 		std::cout << "Unknown command : " << name << std::endl;;
 }

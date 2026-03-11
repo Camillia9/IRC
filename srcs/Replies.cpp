@@ -213,3 +213,33 @@ void IRC::errNoRecipient(Client *client, const t_command &command)
 	std::string rep = oss.str();
 	send(client->getFd(), rep.c_str(), rep.size(), 0);
  }
+
+void IRC::errUserNotInChannel(Client *client, const std::string &nick, const std::string &channel) // utilise ds kick
+{
+	std::ostringstream oss;
+	oss << ":ircserv 441 " << client->getNickname() << " " << nick << " " << channel << " :They aren't on that channel\r\n";
+
+	std::string rep = oss.str();
+	send(client->getFd(), rep.c_str(), rep.size(), 0);
+}
+
+// USE ds INVITE
+
+void IRC::rplInviting(Client *client, const std::string &nick, const std::string &channel)
+{
+    std::ostringstream oss;
+    oss << ":ircserv 341 " << client->getNickname() << " " << nick << " " << channel << "\r\n";
+    
+    std::string rep = oss.str();
+    send(client->getFd(), rep.c_str(), rep.size(), 0);
+}
+
+void IRC::errUserOnChannel(Client *client, const std::string &nick, const std::string &channel)
+{
+    std::ostringstream oss;
+    oss << ":ircserv 443 " << client->getNickname() << " " << nick << " " << channel 
+        << " :is already on channel\r\n";
+    
+    std::string rep = oss.str();
+    send(client->getFd(), rep.c_str(), rep.size(), 0);
+}
