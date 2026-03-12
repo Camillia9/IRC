@@ -19,6 +19,10 @@ private:
 
 	void sendMessage(const std::string &msg);
 	void handleMessage(const std::string &line);
+	void handleCommand(const std::string &from, const std::string &target, const std::string &message);
+	void cmdHelp(const std::string &target);
+	void cmdTime(const std::string &target);
+	void cmdPing(const std::string &target, const std::string &from);
 	
 	public:
 	Bot(const std::string &nickname);

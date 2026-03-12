@@ -103,8 +103,41 @@ target = #bot
 // msg = ":hello toi"
 
 MAIS Attention. Il faut ennlver les ":" !
+DONC: 
+--> getline(stream, string) prend en parametres:
+    stream: le flux depuis lequel on lit.
+    string: la variable ou on stock le resultat
+getline() lit jusqu'au '\n'.
+Ici on envoie en stream istringstream qui est juste une ligne. Donc il va simplement lire tout ce qui reste dans le stream : le message.
 
---> Extrait le nick de l'id. 
+Donc la message = ":hello toi" 
+Il faut enlever les deux points : erase(position, nb de caracteres a supp)
+    position: 0, on veut le premier char.
+    nb: 1, on veut supp que les ':' ou l'espace du debut.
+
+--> Extrait le nick de l'id.
+    find() : On cherche le '!' entre le nick et le user, comme ca on peut recuperer tout le nick juqu'au '!'
+    substr(pos depart, longeur) : 
+        pos depart: 1 car 0 = ':'
+        longueur: id.find('!') - 1 pour calculer juquau '!' sans le '!'. 
+
 --> Mettre un message de debug qui affiche ce que bot a recu
 --> Verifier si c'est une commande pour lui "!"
     --> Si oui, apppeler handleCommand(). 
+
+
+# handleCommand()
+Ici on parse la command pour le Bot. 
+LE message peut etre : 
+    "!help" ou "!time" ou "!calc 5+3"
+
+--> On recupre le message avec istringstream sans le '!'. 
+--> On recupere la cmd (help, time, calc...).
+
+--> Decide si on repond en pv ou dans un channel
+    Si le target est egal a _nick (donc msg pv au bot) replyTo = from, sinon il reste a target par defaut, au meme endroit ou le message a ete envoye (channel)
+
+ ex: :alice!alice@localhost PRIVMSG #bot :!hello
+    from = alice
+    target = #bot
+ - target != _nick | replyTo #bot (dans le channel)

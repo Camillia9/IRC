@@ -4,7 +4,8 @@ CXX         = c++
 CXXFLAGS    = -Wall -Wextra -Werror -std=c++98
 
 SRCS        = main.cpp \
-              bot.cpp
+              bot.cpp \
+			  Command.cpp
 
 OBJDIR      = obj
 OBJS        = $(SRCS:%.cpp=$(OBJDIR)/%.o)

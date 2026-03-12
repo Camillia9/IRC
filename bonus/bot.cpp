@@ -88,14 +88,42 @@ void Bot::handleMessage(const std::string &line)
 		std::string id;
 		std::string command;
 		std::string target;
-		//std::string message;
+		std::string message;
 
 		iss >> id >> command >> target;
 
-		if ( )
+		getline(iss, message);
 
+		if (!message.empty() && message[0] == ' ')
+			message.erase(0, 1);
+		if (!message.empty() && message[0] == ':')
+			message.erase(0, 1);
 
+		std::string nick = id.substr(1, id.find('!') - 1);
+
+		std::cout << "From: " << nick << " | To: " << target << " | Msg: " << message << std::endl;
+
+		if (!message.empty() && message[0] == '!')
+			handleCommand(nick, target, message);
 	}
+}
+
+void Bot::handleCommand(const std::string &from, const std::string &target, const std::string &message)
+{
+	std::istringstream iss(message.substr(1));
+	std::string cmd;
+	iss >> cmd;
+
+	std::string replyTo = target;
+	if (target == _nick)
+		replyTo = from;
+
+	if (cmd == "help")
+		cmdHelp(replyTo);
+	else if (cmd == "time")
+		cmdTime(replyTo);
+	else if (cmd == "ping")
+		cmdPing(replyTo, from);
 }
 
 void Bot::run()
@@ -110,5 +138,7 @@ void Bot::run()
 		
 		// DEBUG
 		std::cout << "<< " << msg << std::endl;
+
+		handleMessage(msg);
 	}
 }
