@@ -27,7 +27,10 @@ void execNick(Client *client, const t_command &cmd, const std::vector<Client*> &
                 return;
             }
         }
-        client->setNickname(cmd.params[0]);
+		std::string oldNick = client->getNickname();
+		client->setNickname(cmd.params[0]);
+		std::string rep = ":" + oldNick + "!" + client->getUsername() + "@localhost NICK " + cmd.params[0] + "\r\n";
+		send(client->getFd(), rep.c_str(), rep.size(), 0);
     }
 }
 
