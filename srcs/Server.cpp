@@ -190,17 +190,25 @@ void	Server::executeCommand(Client &client, const t_command &cmd, Server *server
 
 	const std::string &name = cmd.command;
 
+	//std::cout << "CMD RECU: [" << name << "]" << std::endl;
+
 	if (name.empty())
 		return;
 
-	if (name == "PASS")
+	if (name == "PASS") {
 		execPass(&client, cmd, _password);
+		std::cout << "PASS OK" << std::endl;
+	}
 
-	else if (name == "NICK")
+	else if (name == "NICK") {
 		execNick(&client, cmd, _clients);
+		std::cout << "NICK OK" << std::endl;
+	}
 
-	else if (name == "USER")
+	else if (name == "USER") {
 		execUser(&client, cmd);
+		std::cout << "USER OK" << std::endl;
+	}
 
 	else if (name == "JOIN")
 	 	execJoin(&client, cmd, server);
@@ -225,6 +233,24 @@ void	Server::executeCommand(Client &client, const t_command &cmd, Server *server
 
 	else if (name == "INVITE")
 		execInvite(&client, cmd, server);
+
+	else if (name == "CAP") {
+		if (cmd.params.size() > 0 && cmd.params[0] == "LS") {
+			std::string rep = "ircserv CAP * LS :\r\n";
+			rep += ":ircserv CAP * ACK :\r\n";
+			send(client.getFd(), rep.c_str(), rep.size(), 0);
+		}
+		return;
+	}
+
+	else if (name == "PING")
+	{
+	    std::string rep = ":ircserv PONG ircserv :" + cmd.params[0] + "\r\n";
+	    send(client.getFd(), rep.c_str(), rep.size(), 0);
+	}
+
+	else if (name == "WHO") // IMplementer, mais ne fonctionne pas
+		execWho(&client, cmd, this);
 
 	else
 		std::cout << "Unknown command : " << name << std::endl;;

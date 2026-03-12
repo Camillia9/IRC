@@ -243,3 +243,23 @@ void IRC::errUserOnChannel(Client *client, const std::string &nick, const std::s
     std::string rep = oss.str();
     send(client->getFd(), rep.c_str(), rep.size(), 0);
 }
+
+void IRC::rplWhoReply(Client *client, const std::string &channelName, Client *member, bool isOp)
+{
+	std::ostringstream oss;
+	oss << ":ircserv 352 " << client->getNickname() << " " << channelName << " "
+	<< member->getUsername() << " localhost ircserv " << member->getNickname() << " H"
+	<< (isOp ? "@" : "") << " :0 " << member->getRealName() << "\r\n";
+
+	std::string rep = oss.str();
+	send(client->getFd(), rep.c_str(), rep.size(), 0);
+}
+
+void IRC::rplEndOfWho(Client *client, const std::string &channel)
+{
+	std::ostringstream oss;
+	oss << ":ircserv 315 " << client->getNickname() << " " << channel << " :End of WHO list\r\n";
+
+	std::string rep = oss.str();
+	send(client->getFd(), rep.c_str(), rep.size(), 0);
+}

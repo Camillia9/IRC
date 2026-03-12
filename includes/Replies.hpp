@@ -2,6 +2,7 @@
 #define REPLIES_HPP
 
 #include "Client.hpp"
+#include "Channel.hpp"
 #include "Server.hpp"
 #include "Command.hpp"
 #include "Server.hpp"
@@ -50,6 +51,11 @@ namespace IRC {
 	// INVITE
 	void rplInviting(Client *client, const std::string &nick, const std::string &channel);
 	void errUserOnChannel(Client *client, const std::string &nick, const std::string &channel);
+
+	// WHO
+	void rplWhoReply(Client *client, const std::string &channelName, Client *member, bool isOp);
+	void rplEndOfWho(Client *client, const std::string &channel);
+
 
 };	
 

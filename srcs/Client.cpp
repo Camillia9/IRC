@@ -33,6 +33,11 @@ const std::string& Client::getUsername() const
     return _username;
 }
 
+const std::string& Client::getRealName()const
+{
+	return _realname;
+}
+
 bool Client::isAuthenticated() const
 {
     return _authenticated;

@@ -429,6 +429,8 @@ void	execKick(Client *client, const t_command &cmd, Server *server)
 	channel->removeMember(target); // retirer la cible définitivt 
 
 	server->handleClientLeavingChannel(target, channel, channelName);
+
+	//std::cout << client << "kicked " << target << std::endl;
 }
 
 
@@ -494,4 +496,30 @@ void	execInvite(Client *client, const t_command &cmd, Server *server)
 
 	send(target->getFd(), inviteMsg.c_str(), inviteMsg.length(), 0);
 
+}
+
+void	execWho(Client *client, const t_command &cmd, Server *server)
+{
+	if (!client->isRegistered())
+		return;
+	if (cmd.params.empty())
+		return;
+
+	std::string channelName = cmd.params[0];
+	Channel *channel = server->getChannel(channelName);
+
+	if (!channel) {
+		IRC::errNoSuchChannel(client, channelName);
+		return;
+	}
+
+	const std::map<std::string, Client*> &members = channel->getMembers();
+	for (std::map<std::string, Client*>::const_iterator it = members.begin(); it != members.end(); ++it)
+	{
+		Client *member = it->second;
+		channel->isOperator(member->getNickname());
+	    bool isOp = channel->isOperator(member->getNickname());
+		IRC::rplWhoReply(client, channelName, member, isOp);
+	}
+	IRC::rplEndOfWho(client, channelName);
 }
