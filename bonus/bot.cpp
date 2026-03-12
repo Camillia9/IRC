@@ -84,7 +84,17 @@ void Bot::handleMessage(const std::string &line)
 {
 	if (line.find("PRIVMSG")) 
 	{
-		std::istringstream()
+		std::istringstream iss(line);
+		std::string id;
+		std::string command;
+		std::string target;
+		//std::string message;
+
+		iss >> id >> command >> target;
+
+		if ( )
+
+
 	}
 }
 

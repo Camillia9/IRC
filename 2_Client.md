@@ -89,14 +89,13 @@ Cette fonction tournera en boucle dans run()
 --> istringstream lit une string et la transforme en flux : 
 Si le message recu est :
 :alice!alice@localhost PRIVMSG #bot :hello toi
-
 on fait :
 std::istringstream iss(message);
 std::string id;
 std::string command;
 std::string target;
 
-iss >> is >> command >> target >> (msg)
+iss >> id >> command >> target >> (msg)
 
 id = :alice!alice@localhost
 command = PRIVMSG
