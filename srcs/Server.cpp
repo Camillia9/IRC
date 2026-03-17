@@ -185,6 +185,10 @@ Client *Server::getClientByNick(const std::string &nick)
 	return NULL;
 }
 
+std::map<std::string, Channel*>& Server::getChannels() {
+	return _channels;
+}
+
 void	Server::executeCommand(Client &client, const t_command &cmd, Server *server)
 {
 
@@ -195,20 +199,14 @@ void	Server::executeCommand(Client &client, const t_command &cmd, Server *server
 	if (name.empty())
 		return;
 
-	if (name == "PASS") {
+	if (name == "PASS")
 		execPass(&client, cmd, _password);
-		std::cout << "PASS OK" << std::endl;
-	}
 
-	else if (name == "NICK") {
+	else if (name == "NICK")
 		execNick(&client, cmd, _clients);
-		std::cout << "NICK OK" << std::endl;
-	}
 
-	else if (name == "USER") {
+	else if (name == "USER")
 		execUser(&client, cmd);
-		std::cout << "USER OK" << std::endl;
-	}
 
 	else if (name == "JOIN")
 	 	execJoin(&client, cmd, server);
@@ -233,6 +231,9 @@ void	Server::executeCommand(Client &client, const t_command &cmd, Server *server
 
 	else if (name == "INVITE")
 		execInvite(&client, cmd, server);
+
+	else if (name == "QUIT")
+		execQuit(&client, cmd, this);
 
 	else if (name == "CAP") {
 		if (cmd.params.size() > 0 && cmd.params[0] == "LS") {
@@ -439,4 +440,3 @@ void Server::deleteChannelIfEmpty(const std::string& channelName)
 	delete channel;
 	_channels.erase(channelName);
 }
-

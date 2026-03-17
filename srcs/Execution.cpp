@@ -28,9 +28,15 @@ void execNick(Client *client, const t_command &cmd, const std::vector<Client*> &
             }
         }
 		std::string oldNick = client->getNickname();
-		client->setNickname(cmd.params[0]);
-		std::string rep = ":" + oldNick + "!" + client->getUsername() + "@localhost NICK " + cmd.params[0] + "\r\n";
-		send(client->getFd(), rep.c_str(), rep.size(), 0);
+        client->setNickname(cmd.params[0]);
+
+        // Broadcaster seulement si déjà registered (nick + user + pass déjà faits)
+        if (client->isRegistered() && !oldNick.empty()) {
+            std::string rep = ":" + oldNick + "!" + client->getUsername() 
+                            + "@localhost NICK " + cmd.params[0] + "\r\n";
+            send(client->getFd(), rep.c_str(), rep.size(), 0);
+            // + broadcaster aux channels dont le client est membre
+        }
     }
 }
 
@@ -428,12 +434,7 @@ void	execKick(Client *client, const t_command &cmd, Server *server)
 
 
 	channel->broadcast(kickMsg); // diffuser le mess à ts les membres du channel
-
-	channel->removeMember(target); // retirer la cible définitivt 
-
 	server->handleClientLeavingChannel(target, channel, channelName);
-
-	//std::cout << client << "kicked " << target << std::endl;
 }
 
 
@@ -498,6 +499,29 @@ void	execInvite(Client *client, const t_command &cmd, Server *server)
 	std::string inviteMsg = ":" + client->getNickname() + "!" + client->getUsername() + "@localhost INVITE " + targetNick + " " + channelName + "\r\n";
 
 	send(target->getFd(), inviteMsg.c_str(), inviteMsg.length(), 0);
+
+}
+
+void execQuit(Client *client, const t_command &cmd, Server *server)
+{
+	if (!client->isRegistered())
+		return;
+
+	std::string msg;
+	if (cmd.params.empty())
+		msg = "Client QUIT";
+	else
+		msg = cmd.params[0];
+
+	std::string QuitMsg = ":" + client->getNickname() + "!" + client->getUsername() + "@localhost QUIT " + ":" + msg + "\r\n";
+
+	std::map<std::string, Channel*> &channels = server->getChannels();
+	std::map<std::string, Channel*>::iterator it;
+	for (it = channels.begin(); it != channels.end(); ++it) {
+		if (it->second->isMember(client->getNickname()))
+			it->second->broadcast(QuitMsg);
+	}
+	server->removeClient(client->getFd());
 
 }
 

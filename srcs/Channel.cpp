@@ -258,5 +258,25 @@ std::string Channel::getMembersList() const
 	return membersList;
 }
 
+std::string Channel::getModesString()const 
+{
+	std::string modes = "+";
+	std::string params = "";
 
+	if (_inviteOnly)
+		modes += "i";
+	if (_topicRestricted)
+		modes += "t";
+	if (!_key.empty()) {
+		modes += "k";
+		params += " " + _key;
+	}
+	if (_userLimit > 0) {
+		modes += "l";
+		std::ostringstream oss;
+		oss << _userLimit;
+		params += " " + oss.str();
+	}
 
+	return modes + params;
+}

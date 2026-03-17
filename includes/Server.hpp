@@ -38,44 +38,33 @@ private:
 	void initPoll();
 	void acceptNewClient();   		// Nouvelle connexion détectée
 	void handleClientData(int fd);  // Client a envoyé des données
-	void removeClient(int fd);      // Client déconnecté
 	void addClient(int fd);			// Ajouter un client à la liste
+
 	Client*  getClientByFd(int fd); // Retrouver un client par son FD
-	//Client*	getClientByNick(const std::string &nick); // Retrouver un client par son nick
-
 	std::map<std::string, Channel*> _channels; // ts les channels
-
-
-
-	//gest° channel
-	bool isValidChannelName(const std::string& channelName) const;
+	bool isValidChannelName(const std::string& channelName) const; //gest° channel
 	
 	
-	
-	
-	
-	
-	
-	public:
+public:
 	Server(int port, const std::string &password);	// Constructeur
 	~Server();										// Destructeur
 	
+	void removeClient(int fd);      // Client déconnecté
 	void run();               		// Boucle principale
 	
 	const std::string&	getPassword()const;
 	const std::vector<Client*>& getClients()const;
-	
+	std::map<std::string, Channel*>& getChannels();
 	Client*	getClientByNick(const std::string &nick); // Retrouver un client par son nick
-	void executeCommand(Client &client, const t_command &cmd, Server *server);
 	
 	Channel*	findChannel(const std::string& channelName);
     Channel*	createChannel(const std::string& channelName);
     Channel*	getOrCreateChannel(const std::string& channelName);
 	Channel* 	getChannel(const std::string &name);
-    void	deleteChannelIfEmpty(const std::string& channelName);
-	bool doesChannelExist(const std::string& channelName);
-
-	void handleClientLeavingChannel(Client *client, Channel *channel, const std::string &channelName);
+	void		executeCommand(Client &client, const t_command &cmd, Server *server);
+    void		deleteChannelIfEmpty(const std::string& channelName);
+	bool 		doesChannelExist(const std::string& channelName);
+	void 		handleClientLeavingChannel(Client *client, Channel *channel, const std::string &channelName);
 };
 
 

@@ -98,7 +98,7 @@ std::vector<std::string> Client::extractMessages()
 		if (!msg.empty())
 		{
 			messages.push_back(msg);
-			//std::cout << "Message extracted: [" << msg << "]" << std::endl;
+			std::cout << "Message extracted: [" << msg << "]" << std::endl;
 		}
 		_recvBuffer.erase(0, pos + 2);
 	}

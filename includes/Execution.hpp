@@ -39,6 +39,9 @@ void	execKick(Client *client, const t_command &cmd, Server *server);
 // INVITE
 void	execInvite(Client *client, const t_command &cmd, Server *server);
 
+// QUIT
+void	execQuit(Client *client, const t_command &cmd, Server *server);
+
 // WHO
 void	execWho(Client *client, const t_command &cmd, Server *server);
 // Bonus
