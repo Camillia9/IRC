@@ -141,3 +141,24 @@ LE message peut etre :
     from = alice
     target = #bot
  - target != _nick | replyTo #bot (dans le channel)
+
+ *Rappels istringstream()*
+┌──────────────────────────────────────────────────────────────────────────┐
+│ TYPE DE VARIABLE │ COMPORTEMENT                   │ EXEMPLE              │
+├──────────────────┼────────────────────────────────┼──────────────────────┤
+│ int              │ Lit les chiffres consécutifs   │ "123abc" → 123       │
+│                  │ S'arrête au premier non-chiffre│ "42+5"   → 42        │
+│                  │                                │ "5 10"   → 5         │
+├──────────────────┼────────────────────────────────┼──────────────────────┤
+│ char             │ Lit exactement 1 caractère     │ "abc"    → 'a'       │
+│                  │ Ignore les espaces avant       │ "+123"   → '+'       │
+│                  │                                │ "  x"    → 'x'       │
+├──────────────────┼────────────────────────────────┼──────────────────────┤
+│ std::string      │ Lit jusqu'au prochain espace   │ "hello world" → "hello" │
+│                  │ (whitespace: espace, \t, \n)   │ "abc123"      → "abc123"│
+│                  │                                │ "a b c"       → "a"     │
+├──────────────────┼────────────────────────────────┼──────────────────────┤
+│ double / float   │ Lit les chiffres + point       │ "3.14abc" → 3.14     │
+│                  │ S'arrête au premier non-nombre │ "2.5 1.3" → 2.5      │
+│                  │                                │ "0.99"    → 0.99     │
+└──────────────────┴────────────────────────────────┴──────────────────────┘

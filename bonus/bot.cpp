@@ -1,6 +1,8 @@
 #include "bot.hpp"
 
-Bot::Bot(const std::string &nickname) : _nick(nickname), _realName("BOT Serv"), _recvBuffer("") {}
+Bot::Bot(const std::string &nickname) : _nick(nickname), _realName("BOT Serv"), _recvBuffer("") {
+	srand(time(0));
+}
 
 Bot::~Bot() {}
 
@@ -124,6 +126,13 @@ void Bot::handleCommand(const std::string &from, const std::string &target, cons
 		cmdTime(replyTo);
 	else if (cmd == "ping")
 		cmdPing(replyTo, from);
+	else if (cmd == "info")
+		cmdInfo(replyTo);
+	else if (cmd == "calc") {
+		std::string expression;
+		std::getline(iss, expression);
+		cmdCalculate(replyTo, expression);
+	}
 }
 
 void Bot::run()

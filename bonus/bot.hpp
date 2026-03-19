@@ -23,6 +23,8 @@ private:
 	void cmdHelp(const std::string &target);
 	void cmdTime(const std::string &target);
 	void cmdPing(const std::string &target, const std::string &from);
+	void cmdInfo(const std::string &target);
+	void cmdCalculate(const std::string &target, const std::string &expression);
 	
 	public:
 	Bot(const std::string &nickname);
