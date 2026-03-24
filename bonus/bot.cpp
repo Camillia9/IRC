@@ -1,5 +1,7 @@
 #include "bot.hpp"
 
+extern bool g_running;
+
 Bot::Bot(const std::string &nickname) : _nick(nickname), _realName("BOT Serv"), _recvBuffer("") {
 	srand(time(0));
 }
@@ -29,6 +31,7 @@ void Bot::connect(const std::string &host, int port, const std::string &pass)
 		exit(1);
 	}
 	std::cout << "OK: Connected to server!" << std::endl;
+	fcntl(_socket, F_SETFL, O_NONBLOCK);
 
 	authenticated(pass);
 
@@ -55,9 +58,9 @@ std::string Bot::receiveMessage()
 	int bytes_read = recv(_socket, buffer, sizeof(buffer) - 1, 0);
 
 	if (bytes_read <= 0) {
-		std::cerr << "Server disconnected or error" << std::endl;
+		std::cerr << "Server disconnected" << std::endl;
 		close (_socket);
-		exit(1);
+		return "";
 	}
 
 	buffer[bytes_read] = '\0';
@@ -128,26 +131,38 @@ void Bot::handleCommand(const std::string &from, const std::string &target, cons
 		cmdPing(replyTo, from);
 	else if (cmd == "info")
 		cmdInfo(replyTo);
-	else if (cmd == "calc") {
-		std::string expression;
-		std::getline(iss, expression);
-		cmdCalculate(replyTo, expression);
-	}
 }
 
 void Bot::run()
 {
 	std::cout << "Bot is running... Press Ctrl+c to stop" << std::endl;
 
-	while (true) 
-	{
-		std::string msg = receiveMessage();
-		if (msg.empty())
-			continue;
-		
-		// DEBUG
-		std::cout << "<< " << msg << std::endl;
+	struct pollfd pfd;
+	pfd.fd = _socket;
+	pfd.events = POLLIN;
 
-		handleMessage(msg);
+	while (g_running) 
+	{
+		int pollEvents = poll(&pfd, 1, -1);  // -1 bloque jusqu'a event
+
+		if (pollEvents == -1) {
+			std::cerr << "poll error" << std::endl;
+			break;
+		}
+
+		if (pfd.revents & POLLIN) {
+			std::string msg = receiveMessage();
+			if (msg.empty())
+				break;
+			
+			// DEBUG
+			std::cout << "<< " << msg << std::endl;
+			handleMessage(msg);
+		}
+		if (pfd.revents & (POLLHUP | POLLERR)) {
+			std::cerr << "Connection closed by server" << std::endl;
+			break;
+		}
 	}
+	close (_socket);
 }

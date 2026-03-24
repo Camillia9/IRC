@@ -1,7 +1,16 @@
 #include "bot.hpp"
 
+bool g_running = true;
+
+void signalHandler(int signal)
+{
+    (void)signal;
+    g_running = false;
+}
+
 int main(int ac, char **av)
 {
+	signal(SIGINT, signalHandler);
 	if (ac != 5) {
 		std::cerr << "Usage: ./ircbot <host> <port> <password> <nickname>" << std::endl;
 		return 1;

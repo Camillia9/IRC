@@ -2,7 +2,7 @@
 
 void Bot::cmdHelp(const std::string &target)
 {
-    sendMessage("PRIVMSG " + target + " :Available commands: !help, !time, !ping, !calc, !info\r\n");
+    sendMessage("PRIVMSG " + target + " :Available commands: !help, !time, !ping, !info\r\n");
 }
 
 void Bot::cmdTime(const std::string &target)
@@ -24,7 +24,7 @@ void Bot::cmdPing(const std::string &target, const std::string &from)
 
 void Bot::cmdInfo(const std::string &target)
 {
-	std::string info[] {
+	std::string info[] = {
 		"Si tu vois ce message, c'est que le code marche. Incroyable.",
 		"Tu avais une vie avant de lancer ce programme.",
 		"404: Motivation not found.",
@@ -37,36 +37,10 @@ void Bot::cmdInfo(const std::string &target)
 		"Le problème, c'est pas le code. C'est toi.",
 		"Compilation réussie. Ta vie, moins.",
 		"Ce message n'a aucune utilité. Comme toi.",
-		"Tu vas relancer le programme. On le sait tous."
+		"Tu vas relancer le programme. On le sait tous.",
 		"Mon code fonctionne. Tu peux maintenant tout casser.",
 	};
 
 	int random = rand() % 14;
     sendMessage("PRIVMSG " + target + " :🎱 " + info[random] + "\r\n");
-}
-
-void Bot::cmdCalculate(const std::string &target, const std::string &expression)
-{
-	// expression = "4 - 3"
-	std::istringstream iss(expression);
-	int a;
-	int b;
-	char op;
-	int result = 0;
-
-	iss >> a >> op >> b;
-
-	if (op == '+')
-		result = a + b;
-	else if (op == '-')
-		result = a - b;
-	else if (op == '*')
-		result = a * b;
-	else if (op == '/')
-		result = (b != 0) ? a / b : 0;
-
-	std::ostringstream oss;
-	oss << a << op << b << '=' << result;
-
-	sendMessage("PRIVMSG " + target + " :" + oss.str() + "\r\n");
 }

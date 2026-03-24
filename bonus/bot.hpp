@@ -9,6 +9,9 @@
 #include <unistd.h>
 #include <cstdlib>
 #include <sstream>
+#include <fcntl.h>
+#include <poll.h>
+#include <signal.h>
 
 class Bot {
 private:
