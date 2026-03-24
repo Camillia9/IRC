@@ -519,7 +519,7 @@ void execQuit(Client *client, const t_command &cmd, Server *server)
 	std::map<std::string, Channel*>::iterator it;
 	for (it = channels.begin(); it != channels.end(); ++it) {
 		if (it->second->isMember(client->getNickname()))
-			it->second->broadcast(QuitMsg);
+			it->second->broadcast(QuitMsg, client);
 	}
 	server->removeClient(client->getFd());
 
