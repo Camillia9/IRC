@@ -144,8 +144,8 @@ void Bot::handleCommand(const std::string &from, const std::string &target, cons
 		cmdTime(replyTo);
 	else if (cmd == "ping")
 		cmdPing(replyTo, from);
-	//else if (cmd == "info")
-	//	cmdInfo(replyTo);
+	else if (cmd == "info")
+		cmdInfo(replyTo);
 }
 
 void Bot::sendMultilineMessage(const std::string &target, const std::vector<std::string> &lines)
