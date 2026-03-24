@@ -54,26 +54,41 @@ void Bot::authenticated(const std::string &pass)
 
 std::string Bot::receiveMessage()
 {
-	char buffer[512]; // Taille max d'un message IRC 
-	int bytes_read = recv(_socket, buffer, sizeof(buffer) - 1, 0);
+    char buffer[512];
 
-	if (bytes_read <= 0) {
-		std::cerr << "Server disconnected" << std::endl;
-		close (_socket);
-		return "";
-	}
+    while (true)
+    {
+        int bytes_read = recv(_socket, buffer, sizeof(buffer) - 1, 0);
 
-	buffer[bytes_read] = '\0';
-	_recvBuffer += buffer;
+        if (bytes_read > 0)
+        {
+            buffer[bytes_read] = '\0';
+            _recvBuffer += buffer;
+        }
+        else if (bytes_read == 0)
+        {
+            std::cerr << "Server disconnected" << std::endl;
+            close(_socket);
+            return "";
+        }
+        else // bytes_read == -1
+        {
+            if (errno == EAGAIN || errno == EWOULDBLOCK)
+                break; // ✅ PLUS RIEN À LIRE → normal
 
-	size_t pos = _recvBuffer.find("\r\n");
-	if (pos == std::string::npos)
-		return "";
-	
-	std::string line = _recvBuffer.substr(0, pos);
-	_recvBuffer.erase(0, pos + 2);
+            std::cerr << "recv() error:" << std::endl;
+            close(_socket);
+            return "";
+        }
+    }
+    size_t pos = _recvBuffer.find("\r\n");
+    if (pos == std::string::npos)
+        return "";
 
-	return line;	
+    std::string line = _recvBuffer.substr(0, pos);
+    _recvBuffer.erase(0, pos + 2);
+
+    return line;
 }
 
 void Bot::joinChannel(const std::string &channel)
@@ -87,7 +102,7 @@ void Bot::joinChannel(const std::string &channel)
 
 void Bot::handleMessage(const std::string &line)
 {
-	if (line.find("PRIVMSG")) 
+	if (line.find("PRIVMSG") != std::string::npos) 
 	{
 		std::istringstream iss(line);
 		std::string id;
@@ -129,8 +144,17 @@ void Bot::handleCommand(const std::string &from, const std::string &target, cons
 		cmdTime(replyTo);
 	else if (cmd == "ping")
 		cmdPing(replyTo, from);
-	else if (cmd == "info")
-		cmdInfo(replyTo);
+	//else if (cmd == "info")
+	//	cmdInfo(replyTo);
+}
+
+void Bot::sendMultilineMessage(const std::string &target, const std::vector<std::string> &lines)
+{
+    for (size_t i = 0; i < lines.size(); i++)
+    {
+        sendMessage("PRIVMSG " + target + " :" + lines[i] + "\r\n");
+        usleep(100000);  // Pause 100ms entre chaque message (évite le flood)
+    }
 }
 
 void Bot::run()
@@ -151,13 +175,15 @@ void Bot::run()
 		}
 
 		if (pfd.revents & POLLIN) {
-			std::string msg = receiveMessage();
-			if (msg.empty())
-				break;
+			while (true) {
+				std::string msg = receiveMessage();
+				if (msg.empty())
+					break;
 			
-			// DEBUG
-			std::cout << "<< " << msg << std::endl;
-			handleMessage(msg);
+				// DEBUG
+				std::cout << "<< " << msg << std::endl;
+				handleMessage(msg);
+			}
 		}
 		if (pfd.revents & (POLLHUP | POLLERR)) {
 			std::cerr << "Connection closed by server" << std::endl;

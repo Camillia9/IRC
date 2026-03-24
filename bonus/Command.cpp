@@ -24,23 +24,18 @@ void Bot::cmdPing(const std::string &target, const std::string &from)
 
 void Bot::cmdInfo(const std::string &target)
 {
-	std::string info[] = {
-		"Si tu vois ce message, c'est que le code marche. Incroyable.",
-		"Tu avais une vie avant de lancer ce programme.",
-		"404: Motivation not found.",
-		"Ton futur toi te regarde et dit: 'frere... pourquoi ?'",
-		"Ce programme est plus stable que toi.",
-		"Tu pensais faire quelque chose d'utile aujourd'hui ?",
-		"Ton PC chauffe plus que tes relations.",
-		"Le bug est une feature. Toujours.",
-		"Bravo. Tu viens de perdre 3 secondes de ta vie.",
-		"Le problème, c'est pas le code. C'est toi.",
-		"Compilation réussie. Ta vie, moins.",
-		"Ce message n'a aucune utilité. Comme toi.",
-		"Tu vas relancer le programme. On le sait tous.",
-		"Mon code fonctionne. Tu peux maintenant tout casser.",
-	};
+	std::vector<std::string>info;
 
-	int random = rand() % 14;
-    sendMessage("PRIVMSG " + target + " :🎱 " + info[random] + "\r\n");
+	info.push_back("=== IRC Commands References ===");
+
+	info.push_back("JOIN (Join a channel)");
+	info.push_back("Netcat: JOIN #channel");
+	info.push_back("IRSSI: /JOIN channel");
+
+	info.push_back("PART (Leave a channel)");
+	info.push_back("Netcat: PART #channel [: reason]");
+	info.push_back("IRSSI: /PART [reason]");
+
+	sendMultilineMessage(target, info);
+
 }

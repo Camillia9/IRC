@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include <poll.h>
 #include <signal.h>
+#include <vector>
 
 class Bot {
 private:
@@ -22,12 +23,12 @@ private:
 
 	void sendMessage(const std::string &msg);
 	void handleMessage(const std::string &line);
+	void sendMultilineMessage(const std::string &target, const std::vector<std::string> &lines);
 	void handleCommand(const std::string &from, const std::string &target, const std::string &message);
 	void cmdHelp(const std::string &target);
 	void cmdTime(const std::string &target);
 	void cmdPing(const std::string &target, const std::string &from);
 	void cmdInfo(const std::string &target);
-	void cmdCalculate(const std::string &target, const std::string &expression);
 	
 	public:
 	Bot(const std::string &nickname);
