@@ -13,6 +13,7 @@
 #include <poll.h>
 #include <signal.h>
 #include <vector>
+#include <errno.h>
 
 class Bot {
 private:

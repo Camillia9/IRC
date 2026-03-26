@@ -104,6 +104,35 @@ void Server::removeClient(int fd)
 
 	std::cout << "REMOVING client: " << client->getNickname() 
        << " (FD " << fd << ")" << std::endl;
+
+	// Brodcast a tout les clients lorsque ^C ou ^D 1 SEULE FOIS (Eviter d'envoyer autant de message que de channels appartenant)
+    if (client->isRegistered())  // Seulement si le client était enregistré
+    {
+        std::string quitMsg = ":" + client->getNickname() + "!" + 
+                              client->getUsername() + "@localhost QUIT :Client disconnected\r\n";
+
+		std::set<int>notifClients; // Le FD des clients a envoyer le msg. Set evite les doublons.
+		std::map<std::string, Channel*>::iterator it; // sert a parcourir les clients des channels
+
+		for (it = _channels.begin(); it != _channels.end(); ++it) {
+			Channel *channel = it->second;
+
+			if (channel->isMember(client->getNickname())) {
+				const std::map<std::string, Client*>&members = channel->getMembers();
+				std::map<std::string, Client*>::const_iterator mit;
+
+				for (mit = members.begin(); mit != members.end(); ++mit) {
+					Client *member = mit->second;
+					if (member != client) // Ne pas s'envoyer a soi-meme
+						notifClients.insert(member->getFd());
+				}
+			}
+		}
+		for (std::set<int>::iterator fit = notifClients.begin(); fit != notifClients.end(); ++fit) {
+			send (*fit, quitMsg.c_str(), quitMsg.size(), 0);
+		}
+
+    }
 	
 	// 2. Le retirer de tous ses channels
 	std::vector<std::string> channelsToDelete; // vector pour push tout les channels a supprimer (pour eviter de supprimer directment en parcourant les channels et que l'it devient invalide)
@@ -304,6 +333,8 @@ void Server::handleClientLeavingChannel(Client *client, Channel *channel, const 
 		if (it != Member.end()) {
 			Client *newOp = it->second;
 			channel->addOperator(newOp);
+			std::string modeMsg = ":ircserv MODE " + channelName + " +o " + newOp->getNickname() + "\r\n";
+        	channel->broadcast(modeMsg);
 		}
 	}
 	if (channel->isEmpty())

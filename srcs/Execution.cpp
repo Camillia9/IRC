@@ -339,7 +339,15 @@ void execModes(Client *client, const t_command &cmd, Server *server)
 	}
 	std::string modeMsg = ":" + client->getNickname() + "!" + 
                       client->getUsername() + "@localhost MODE " + 
-                      channelName + " " + ModesList + "\r\n";
+                      channelName;
+
+	// Ajouter TOUS les paramètres originaux (modes + arguments)
+	for (size_t i = 1; i < cmd.params.size(); i++)
+	{
+	    modeMsg += " " + cmd.params[i];
+	}
+	modeMsg += "\r\n";
+
 	channel->broadcast(modeMsg);
 }
 
