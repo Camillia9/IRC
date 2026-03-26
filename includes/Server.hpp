@@ -61,7 +61,7 @@ public:
     Channel*	createChannel(const std::string& channelName);
     Channel*	getOrCreateChannel(const std::string& channelName);
 	Channel* 	getChannel(const std::string &name);
-	void		executeCommand(Client &client, const t_command &cmd, Server *server);
+	void		executeCommand(Client &client, const t_command &cmd);
     void		deleteChannelIfEmpty(const std::string& channelName);
 	bool 		doesChannelExist(const std::string& channelName);
 	void 		handleClientLeavingChannel(Client *client, Channel *channel, const std::string &channelName);

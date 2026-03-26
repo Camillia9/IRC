@@ -218,7 +218,7 @@ std::map<std::string, Channel*>& Server::getChannels() {
 	return _channels;
 }
 
-void	Server::executeCommand(Client &client, const t_command &cmd, Server *server)
+void	Server::executeCommand(Client &client, const t_command &cmd)
 {
 
 	const std::string &name = cmd.command;
@@ -238,28 +238,28 @@ void	Server::executeCommand(Client &client, const t_command &cmd, Server *server
 		execUser(&client, cmd);
 
 	else if (name == "JOIN")
-	 	execJoin(&client, cmd, server);
+	 	execJoin(&client, cmd, this);
 
 	else if (name == "PART")
-	 	execPart(&client, cmd, server);
+	 	execPart(&client, cmd, this);
 	
 	else if (name == "PRIVMSG")
-		execPrvMsg(&client, cmd, server);
+		execPrvMsg(&client, cmd, this);
 
 	else if (name == "TOPIC")
-		execTopic(&client, cmd, server);
+		execTopic(&client, cmd, this);
 
 	else if (name == "MODE")
-		execModes(&client, cmd, server);
+		execModes(&client, cmd, this);
 
 	else if (name == "NAMES")
-		execNames(&client, cmd, server);
+		execNames(&client, cmd, this);
 
 	else if (name == "KICK")
-    	execKick(&client, cmd, server); // maybe changer tous les server par "this"
+    	execKick(&client, cmd, this); // maybe changer tous les server par "this"
 
 	else if (name == "INVITE")
-		execInvite(&client, cmd, server);
+		execInvite(&client, cmd, this);
 
 	else if (name == "QUIT")
 		execQuit(&client, cmd, this);
@@ -314,7 +314,7 @@ void Server::handleClientData(int fd)
 
 			// cmd.brut = line;
 
-			executeCommand(*client, cmd, this);
+			executeCommand(*client, cmd);
         }
 	}
 	else
