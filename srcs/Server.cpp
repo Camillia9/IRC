@@ -256,7 +256,7 @@ void	Server::executeCommand(Client &client, const t_command &cmd)
 		execNames(&client, cmd, this);
 
 	else if (name == "KICK")
-    	execKick(&client, cmd, this); // maybe changer tous les server par "this"
+    	execKick(&client, cmd, this);
 
 	else if (name == "INVITE")
 		execInvite(&client, cmd, this);
@@ -279,7 +279,7 @@ void	Server::executeCommand(Client &client, const t_command &cmd)
 	    send(client.getFd(), rep.c_str(), rep.size(), 0);
 	}
 
-	else if (name == "WHO") // IMplementer, mais ne fonctionne pas
+	else if (name == "WHO")
 		execWho(&client, cmd, this);
 
 	else
